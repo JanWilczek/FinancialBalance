@@ -3,6 +3,10 @@ package FinancialBalance;
 import java.math.BigDecimal;
 import java.util.Date;
 
+/**
+ * A class representing an expense.
+ * @author Jan Wilczek
+ */
 class Expense {
 	private String name;
 	private ExpenseCategory category;

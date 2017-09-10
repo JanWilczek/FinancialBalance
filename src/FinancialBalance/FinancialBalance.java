@@ -25,6 +25,16 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.text.ParseException;
 
+/**
+ * 
+ * @author Jan Wilczek
+ * @date 10.09.2017
+ * 
+ * @version 1.0
+ * 
+ * The main logic-handling class providing FinancialBalance interface.
+ *
+ */
 public class FinancialBalance {
 	private List<Expense> expenses;
 	private String expensesFilePath = "expenses.txt";
@@ -37,6 +47,9 @@ public class FinancialBalance {
 		openExpensesFile();
 	}
 	
+	/**
+	 * Opens the database file or creates a new one.
+	 */
 	private void openExpensesFile()
 	{
 		expensesFile = Paths.get(expensesFilePath);
@@ -77,6 +90,10 @@ public class FinancialBalance {
 		}
 	}
 
+	/**
+	 * Reads database content from a list of lines (strings) to the internal container.
+	 * @param expensesStrings
+	 */
 	private void readExpensesFromFile(List<String> expensesStrings) {
 		Expense expense = new Expense();
 		String[] expenseString = new String[4];
@@ -96,12 +113,17 @@ public class FinancialBalance {
 	}
 	
 	// Public members functions
-	public void addExpense(Expense expense)
+	
+	/**
+	 * Adds an expense to the internal container and to the database file. 
+	 * @param expenseToAdd
+	 */
+	public void addExpense(Expense expenseToAdd)
 	{
-		expenses.add(expense);
+		expenses.add(expenseToAdd);
 		try
 		{
-			Files.write(expensesFile, expense.toDatabaseString().getBytes(charset), StandardOpenOption.CREATE, StandardOpenOption.APPEND);		//TODO: Change file input implementation
+			Files.write(expensesFile, expenseToAdd.toDatabaseString().getBytes(charset), StandardOpenOption.CREATE, StandardOpenOption.APPEND);		//TODO: Change file input implementation
 		}
 		catch(IOException ioe)
 		{
@@ -118,14 +140,48 @@ public class FinancialBalance {
 		}
 	}
 	
-	public void deleteExpense(Expense expense)
+	/**
+	 * Deletes the given expense.
+	 * @param expenseToDelete
+	 */
+	public boolean deleteExpense(Expense expenseToDelete)
 	{
-		//TODO
+		expenses.remove(expenseToDelete);
+		try
+		{
+			List<String> expensesStrings = Files.readAllLines(expensesFile);
+			expensesStrings.remove(expenseToDelete.toDatabaseString());
+			Files.write(expensesFile, expensesStrings, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
+			
+		}
+		catch (IOException ioe)
+		{
+			ioe.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 	
+	/**
+	 * Returns the internal container of expenses.
+	 * TODO: Reconsider the use of this method.
+	 */
 	public List<Expense> getExpenses()
 	{
 		return expenses;
+	}
+	
+	/**
+	 * Clears the internal database. Use with care.
+	 */
+	public void clearDatabase()
+	{
+		expenses.clear();
+		try {
+			Files.delete(expensesFile);
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
 	}
 	
 
