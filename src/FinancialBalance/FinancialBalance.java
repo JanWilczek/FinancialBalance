@@ -95,9 +95,9 @@ public class FinancialBalance {
 	 * @param expensesStrings
 	 */
 	private void readExpensesFromFile(List<String> expensesStrings) {
-		Expense expense = new Expense();
 		String[] expenseString = new String[4];
 		for (String s : expensesStrings) {
+			Expense expense = new Expense();
 			expenseString = s.split("/");
 			expense.setName(expenseString[0]);
 			expense.setCategory(ExpenseCategory.valueOf(expenseString[1]));
