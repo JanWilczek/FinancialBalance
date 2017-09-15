@@ -3,20 +3,29 @@ package FinancialBalance;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.*;
+import java.awt.Insets;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
 import java.lang.reflect.Field;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 /**
  * 
  * @author Jan Wilczek
- *
+ * @date 15.09.17
+ * 
+ * @version 1.0
  * A class responsible for application's GUI layout.
  * Bases on box layout.
  */
@@ -24,9 +33,10 @@ public class AppFrame extends JFrame {
 	
 	public AppFrame(FinancialBalance financialBalance)
 	{
+		this.financialBalance = financialBalance;
 		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		int baseWidth = 700;
-		int baseHeight = 400;
+		int baseHeight = 600;
 		this.setSize(baseWidth, baseHeight);
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		Dimension dim = tk.getScreenSize();
@@ -36,44 +46,69 @@ public class AppFrame extends JFrame {
 		this.setTitle("Financial Balance");
 		
 		// Boxes:
-		Box mainBox = Box.createHorizontalBox(); // Main box containing two sub-panels: reports panel and right panel (add panel above table)
-		Box reportsBox = Box.createVerticalBox(); // Reports box
-		Box rightBox = Box.createVerticalBox(); // Right box
-		Box addBox = Box.createHorizontalBox();	// Add box
-		Box tableBox = Box.createVerticalBox();	// Table box
+//		Box mainBox = Box.createHorizontalBox(); // Main box containing two sub-panels: reports panel and right panel (add panel above table)
+//		Box reportsBox = Box.createVerticalBox(); // Reports box
+//		Box rightBox = Box.createVerticalBox(); // Right box
+//		Box addBox = Box.createHorizontalBox();	// Add box
+//		Box tableBox = Box.createVerticalBox();	// Table box
+		
+		// Panels:
+		mainPanel = new JPanel();
+		mainPanel.setLayout(new GridBagLayout());
+		reportsPanel = new JPanel();
+		//rightPanel = new JPanel();
+		//rightPanel.setLayout(new GridBagLayout());
+		addPanel = new JPanel();
+		Border addBorder = BorderFactory.createTitledBorder("Add an expense");
+		addPanel.setBorder(addBorder);
+		//tablePanel = new JPanel();
+		
+		// Setting up the layouts
+		mainLayoutConstraints = new GridBagConstraints();
+		setLayoutConstraints(1,1,1,2,1,1);
+		mainLayoutConstraints.insets = new Insets(4,4,4,4);
+
 
 		// reportsBox content:
 		Object [][] reportsData = new Object [1][1];
 		String [] reportHeader = {"Monthly reports"};
-		JTable reportsTable = new JTable(new DefaultTableModel(reportsData,reportHeader));
-		reportsBox.add(reportsTable);
+		reportsTable = new JTable(new DefaultTableModel(reportsData,reportHeader));
+		reportsPanel.add(reportsTable);
+		mainPanel.add(reportsPanel, mainLayoutConstraints);
 		
 		
 		// addBox content:
 		//Creating a text field for the expense name
-		JTextField nameField = new JTextField("Insert the expense name here...                                 ");
+		nameField = new JTextField(defaultName);
 		nameField.setBounds(0, 0, 100, 200);	// a line to reconsider
-		addBox.add(nameField);
+		nameField.addFocusListener(new PriceFieldListener());
+		addPanel.add(nameField);
 		
 		//Creating a drop-down menu with the expense categories
-		JComboBox<ExpenseCategory> categoryCombo = new JComboBox<ExpenseCategory>(ExpenseCategory.values());
-		addBox.add(categoryCombo);
+		categoryCombo = new JComboBox<ExpenseCategory>(ExpenseCategory.values());
+		addPanel.add(categoryCombo);
 		
 		//Creating a field to input date of the expense
-		JFormattedTextField dateField = new JFormattedTextField();
-		dateField.setValue(new Date());
-		addBox.add(dateField);
+		dateField = new JSpinner(new SpinnerDateModel(new Date(), null, new Date(), Calendar.DAY_OF_MONTH));
+		JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(dateField,  "dd-MM-yy");
+		dateField.setEditor(dateEditor);
+		dateField.setSize(6, nameField.getHeight());	// TODO: doesn't work
+		addPanel.add(dateField);
 		
 		//Creating a field for price input
-		JFormattedTextField priceField = new JFormattedTextField();
-		priceField.setValue(new BigDecimal("0.00"));
+		priceField = new JFormattedTextField();
+		priceField.setValue("0,00");
 		priceField.setColumns(4);
-		addBox.add(priceField);
+		priceField.addFocusListener(new PriceFieldListener());
+		addPanel.add(priceField);
 		
 		//Creating an 'Add' button to add new expenses
-		JButton addButton = new JButton("Add expense");
-		addBox.add(addButton);
+		addButton = new JButton("Add expense");
+		addButton.addActionListener(new AddButtonListener());
+		addPanel.add(addButton);
 		
+		setLayoutConstraints(1,1,1,1,3,1);
+		mainPanel.add(addPanel,mainLayoutConstraints);
 		
 		// tableBox content
 		//Set the table data
@@ -113,8 +148,8 @@ public class AppFrame extends JFrame {
 		
 		//Create the table
 		//JTable expensesTable = new JTable(new ExpenseTableModel(expensesData,columnNames));
-		JTable expensesTable = new JTable(new DefaultTableModel(expensesData,columnNames));		//TODO: Consider a new table model
-		JScrollPane tableScrollPane = new JScrollPane(expensesTable);
+		expensesTable = new JTable(new DefaultTableModel(expensesData,columnNames));		//TODO: Consider a new table model
+		tableScrollPane = new JScrollPane(expensesTable);
 		expensesTable.setFillsViewportHeight(true);
 		expensesTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); //TODO: Beautify the table
 		
@@ -132,33 +167,140 @@ public class AppFrame extends JFrame {
 		TableColumn priceColumn = expensesTable.getColumnModel().getColumn(3);
 		priceColumn.setPreferredWidth(50);
 		
-		tableBox.add(Box.createHorizontalGlue());
-		tableBox.add(tableScrollPane);
+		//tablePanel.add(Box.createHorizontalGlue());
+		//tablePanel.add(tableScrollPane);
+		setLayoutConstraints(1,2,1,1,3,10);
+		mainPanel.add(tableScrollPane, mainLayoutConstraints);
 		
 		
 		//Box layout order
-		rightBox.add(addBox);
-		rightBox.add(tableBox);
-		mainBox.add(reportsBox);
-		mainBox.add(rightBox);
+		//rightPanel.add(addPanel);
+		//rightPanel.add(tablePanel);
+		//mainPanel.add(reportsPanel);
+		//mainPanel.add(rightPanel);
 		
 		
-		this.add(mainBox);
+		this.add(mainPanel);
+		this.setResizable(false);
 		this.setVisible(true);
-		
-		//Inner listeners
-		class AddButtonListener implements ActionListener
-		{
-			@Override
-			public void actionPerformed(ActionEvent ae) {
-				Expense expenseToAdd = new Expense(nameField.getText(), categoryCombo.getItemAt(0), (Date)dateField.getValue(), (BigDecimal)priceField.getValue());
+			
+	}
+	
+	private void setLayoutConstraints(int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty) 
+	{
+		if (gridx != 0 ) mainLayoutConstraints.gridx = gridx;
+		if (gridy != 0 ) mainLayoutConstraints.gridy = gridy;
+		if (gridwidth != 0 ) mainLayoutConstraints.gridwidth = gridwidth;
+		if (gridwidth != 0 ) mainLayoutConstraints.gridheight = gridheight;
+		if (weightx != 0 ) mainLayoutConstraints.weightx = weightx;
+		if (weighty != 0 ) mainLayoutConstraints.weighty = weighty;
+	}
+	
+	//Inner listeners
+	class AddButtonListener implements ActionListener
+	{
+		@Override
+		public void actionPerformed(ActionEvent ae) {
+			if (ae.getSource().equals(addButton)) {
+				// Check for date correctness
+				Date expenseDate = null;
+				try {
+					expenseDate = (Date) dateField.getValue();
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(AppFrame.this, "Incorrect date format!", "Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				// Check for price correctness
+				BigDecimal expensePrice = null;
+				try {
+					expensePrice = new BigDecimal(priceField.getValue().toString());
+				} catch (NumberFormatException nfe) {
+					JOptionPane.showMessageDialog(AppFrame.this, "Incorrect price format!", "Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				Expense expenseToAdd = new Expense(nameField.getText(),
+						(ExpenseCategory) categoryCombo.getSelectedItem(), expenseDate, expensePrice);
 				financialBalance.addExpense(expenseToAdd);
-			}	
+				//nameField.setText(defaultName);
+				//dateField.setValue(new Date());
+				//priceField.setValue("0.00");
+			}
+		}	
+	}
+	
+	class PriceFieldListener implements FocusListener
+	{
+
+		@Override
+		public void focusGained(FocusEvent fe) {
+			if (fe.getSource().equals(nameField))
+			{
+				if (nameField.getText().equals(defaultName))
+				{
+					nameField.setText("");
+				}
+			}
+			else if (fe.getSource().equals(priceField))
+			{
+				if (nameField.getText().equals("0.00"))
+				{
+					nameField.setText("");
+				}
+			}
 		}
 		
-		//Adding listeners
-		addButton.addActionListener(new AddButtonListener());
-		
+		@Override
+		public void focusLost(FocusEvent fe)
+		{
+			if (fe.getSource().equals(nameField))
+			{
+				if (nameField.getText().length() == 0)
+				{
+					nameField.setText(defaultName);
+				}
+			}
+			else if (fe.getSource().equals(priceField))
+			{
+				if (nameField.getText().equals(""))
+				{
+					nameField.setText("0.00");
+				}
+			}
+		}
 		
 	}
+	
+	// private members
+	// inner application logic
+	private FinancialBalance financialBalance;
+	
+	// GUI elements
+	// panels
+	private JPanel mainPanel;
+	private JPanel reportsPanel;
+	private JPanel rightPanel;
+	private JPanel addPanel;
+	private JPanel tablePanel;
+	
+	// buttons
+	private JButton addButton;
+	
+	// tables
+	private JTable expensesTable;
+	private JTable reportsTable;
+	
+	// other fields
+	private JTextField nameField;
+	private JComboBox<ExpenseCategory> categoryCombo;
+	private JSpinner dateField;
+	private JFormattedTextField priceField;
+	private JScrollPane tableScrollPane;
+	
+	// layout constraints
+	private GridBagConstraints mainLayoutConstraints;
+	
+	// other private members
+	private String defaultName = "Insert the expense name here...                                 ";
 }
