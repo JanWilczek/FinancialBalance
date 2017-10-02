@@ -1,7 +1,7 @@
 package FinancialBalance;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.util.Calendar;
 
 /**
  * A class representing an expense.
@@ -10,12 +10,12 @@ import java.util.Date;
 class Expense {
 	private String name;
 	private ExpenseCategory category;
-	private Date date;
+	private Calendar date;
 	private BigDecimal price;
 	
 	
 	// Constructors
-	Expense(String name, ExpenseCategory category, Date date, BigDecimal price)	//TODO: Change Date to Calendar or an other class
+	Expense(String name, ExpenseCategory category, Calendar date, BigDecimal price)	//TODO: Change Date to Calendar or an other class
 	{
 		this.name = name;
 		this.category = category;
@@ -23,7 +23,7 @@ class Expense {
 		this.price = price;
 	}
 	
-	Expense(String name, Date date, BigDecimal price)
+	Expense(String name, Calendar date, BigDecimal price)
 	{
 		this.name = name;
 		this.category = ExpenseCategory.Other;
@@ -35,7 +35,7 @@ class Expense {
 	{
 		this.name = "";
 		this.category = ExpenseCategory.Other;
-		this.date = new Date();
+		this.date = Calendar.getInstance();
 		this.price = new BigDecimal("0.00");
 	}
 	
@@ -48,11 +48,11 @@ class Expense {
 	
 	public String toDatabaseString()
 	{
-		return getName() + "/" + getCategory() + "/" + getDate().getTime() + "/" + getPrice() + System.lineSeparator(); //TODO: insert a cross-platform line separator
+		return getName() + "/" + getCategory() + "/" + getDate().getTime().getTime() + "/" + getPrice() + System.lineSeparator(); //TODO: insert a cross-platform line separator
 	}
 	
 	// Getters
-	public Date getDate()
+	public Calendar getDate()
 	{
 		return date;
 	}
@@ -73,7 +73,7 @@ class Expense {
 	}
 	
 	// Setters
-	void setDate(Date date)
+	void setDate(Calendar date)
 	{
 		this.date = date;
 	}

@@ -20,10 +20,14 @@ import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.Set;
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.util.Date;
-import java.text.ParseException;
+import java.util.Calendar;
+import java.time.YearMonth;
 
 /**
  * 
@@ -37,6 +41,7 @@ import java.text.ParseException;
  */
 public class FinancialBalance {
 	private List<Expense> expenses;
+	private Map<YearMonth, MonthlyReport> monthlyReports;
 	private String expensesFilePath = "expenses.txt";
 	private Path expensesFile;
 	private final static Charset charset = Charset.forName("ISO-8859-1");
@@ -45,6 +50,9 @@ public class FinancialBalance {
 	{
 		expenses = new LinkedList<Expense>();
 		openExpensesFile();
+		
+		monthlyReports = new TreeMap<>();
+		generateMonthlyReports();
 	}
 	
 	/**
@@ -103,7 +111,9 @@ public class FinancialBalance {
 			expense.setCategory(ExpenseCategory.valueOf(expenseString[1]));
 			try {
 				//expense.setDate(DateFormat.getDateInstance().parse(expenseString[2]));
-				expense.setDate(new Date(Long.parseLong(expenseString[2])));
+				Calendar date = Calendar.getInstance();
+				date.setTime(new Date(Long.parseLong(expenseString[2])));
+				expense.setDate(date);
 			} catch (NumberFormatException nfe) {
 				nfe.printStackTrace();
 			}
@@ -172,6 +182,15 @@ public class FinancialBalance {
 	}
 	
 	/**
+	 * @return monthly reports
+	 * The expenses monthly reports generated from the database.
+	 */
+	public Map<YearMonth, MonthlyReport> getMonthlyReports()
+	{
+		return monthlyReports;
+	}
+	
+	/**
 	 * Clears the internal database. Use with care.
 	 */
 	public void clearDatabase()
@@ -184,5 +203,20 @@ public class FinancialBalance {
 		}
 	}
 	
-
+	/**
+	 * Generates monthly reports for all months that have appeared in the database.
+	 */
+	private void generateMonthlyReports()
+	{
+		if (expenses == null || monthlyReports == null) return;
+		Set<YearMonth> monthSet = new TreeSet<YearMonth>();
+		for (Expense expense : expenses)
+		{
+			monthSet.add(YearMonth.of(expense.getDate().get(Calendar.YEAR), expense.getDate().get(Calendar.MONTH)));
+		}
+		for (YearMonth month : monthSet)
+		{
+			monthlyReports.put(month, new MonthlyReport(month, expenses));
+		}
+	}
 }

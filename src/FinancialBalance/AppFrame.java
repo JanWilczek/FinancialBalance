@@ -16,9 +16,11 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
 import java.math.BigDecimal;
+import java.time.YearMonth;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -70,11 +72,7 @@ public class AppFrame extends JFrame {
 
 
 		// reportsBox content:
-		Object [][] reportsData = new Object [1][1];
-		String [] reportHeader = {"Monthly reports"};
-		reportsTable = new JTable(new DefaultTableModel(reportsData,reportHeader));
-		reportsPanel.add(reportsTable);
-		mainPanel.add(reportsPanel, mainLayoutConstraints);
+		generateReportsTable();
 		
 		
 		// addBox content:
@@ -97,7 +95,7 @@ public class AppFrame extends JFrame {
 		
 		//Creating a field for price input
 		priceField = new JFormattedTextField();
-		priceField.setValue("0,00");
+		priceField.setValue("0.00");
 		priceField.setColumns(4);
 		priceField.addFocusListener(new PriceFieldListener());
 		addPanel.add(priceField);
@@ -111,6 +109,37 @@ public class AppFrame extends JFrame {
 		mainPanel.add(addPanel,mainLayoutConstraints);
 		
 		// tableBox content
+		generateExpensesTable();		
+		
+		//Box layout order
+		//rightPanel.add(addPanel);
+		//rightPanel.add(tablePanel);
+		//mainPanel.add(reportsPanel);
+		//mainPanel.add(rightPanel);
+		
+		
+		this.add(mainPanel);
+		this.setResizable(false);
+		this.setVisible(true);
+			
+	}
+
+	private void generateReportsTable() {
+		Object [][] reportsData = new Object [financialBalance.getMonthlyReports().size()][2];
+		int dataIndex = 0;
+		for (Map.Entry<YearMonth, MonthlyReport> monthlyReport : financialBalance.getMonthlyReports().entrySet())
+		{
+			reportsData[dataIndex][0] = monthlyReport.getKey();
+			reportsData[dataIndex][1] = monthlyReport.getValue().getTotal();
+			dataIndex++;
+		}
+		String [] reportHeader = {"Month", "Total"};
+		reportsTable = new JTable(new DefaultTableModel(reportsData,reportHeader));
+		reportsPanel.add(reportsTable);
+		mainPanel.add(reportsPanel, mainLayoutConstraints);
+	}
+
+	private void generateExpensesTable() {
 		//Set the table data
 		//Get column names from Expense fields as a String array
 		String[] columnNames = null;
@@ -171,19 +200,6 @@ public class AppFrame extends JFrame {
 		//tablePanel.add(tableScrollPane);
 		setLayoutConstraints(1,2,1,1,3,10);
 		mainPanel.add(tableScrollPane, mainLayoutConstraints);
-		
-		
-		//Box layout order
-		//rightPanel.add(addPanel);
-		//rightPanel.add(tablePanel);
-		//mainPanel.add(reportsPanel);
-		//mainPanel.add(rightPanel);
-		
-		
-		this.add(mainPanel);
-		this.setResizable(false);
-		this.setVisible(true);
-			
 	}
 	
 	private void setLayoutConstraints(int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty) 
@@ -203,9 +219,9 @@ public class AppFrame extends JFrame {
 		public void actionPerformed(ActionEvent ae) {
 			if (ae.getSource().equals(addButton)) {
 				// Check for date correctness
-				Date expenseDate = null;
+				Calendar expenseDate = Calendar.getInstance();
 				try {
-					expenseDate = (Date) dateField.getValue();
+					expenseDate.setTime((Date) dateField.getValue());
 				} catch (Exception e) {
 					JOptionPane.showMessageDialog(AppFrame.this, "Incorrect date format!", "Error",
 							JOptionPane.ERROR_MESSAGE);
@@ -223,6 +239,7 @@ public class AppFrame extends JFrame {
 				Expense expenseToAdd = new Expense(nameField.getText(),
 						(ExpenseCategory) categoryCombo.getSelectedItem(), expenseDate, expensePrice);
 				financialBalance.addExpense(expenseToAdd);
+				generateExpensesTable();
 				//nameField.setText(defaultName);
 				//dateField.setValue(new Date());
 				//priceField.setValue("0.00");
@@ -244,9 +261,9 @@ public class AppFrame extends JFrame {
 			}
 			else if (fe.getSource().equals(priceField))
 			{
-				if (nameField.getText().equals("0.00"))
+				if (priceField.getText().equals("0.00"))
 				{
-					nameField.setText("");
+					priceField.setText("");
 				}
 			}
 		}
@@ -263,9 +280,9 @@ public class AppFrame extends JFrame {
 			}
 			else if (fe.getSource().equals(priceField))
 			{
-				if (nameField.getText().equals(""))
+				if (priceField.getText().equals(""))
 				{
-					nameField.setText("0.00");
+					priceField.setText("0.00");
 				}
 			}
 		}
