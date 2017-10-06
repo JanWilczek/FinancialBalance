@@ -38,8 +38,6 @@ public class AppFrame extends JFrame {
 	{
 		this.financialBalance = financialBalance;
 		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		int baseWidth = 700;
-		int baseHeight = 600;
 		this.setSize(baseWidth, baseHeight);
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		Dimension dim = tk.getScreenSize();
@@ -58,7 +56,7 @@ public class AppFrame extends JFrame {
 		// Panels:
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new GridBagLayout());
-		reportsPanel = new JPanel();
+		//reportsPanel = new JPanel();
 		//rightPanel = new JPanel();
 		//rightPanel.setLayout(new GridBagLayout());
 		addPanel = new JPanel();
@@ -68,9 +66,7 @@ public class AppFrame extends JFrame {
 		
 		// Setting up the layouts
 		mainLayoutConstraints = new GridBagConstraints();
-		setLayoutConstraints(1,1,1,2,1,1);
-		mainLayoutConstraints.insets = new Insets(4,4,4,4);
-
+		mainLayoutConstraints.insets = new Insets(2,2,2,2);
 
 		// reportsBox content:
 		generateReportsTable();
@@ -79,7 +75,7 @@ public class AppFrame extends JFrame {
 		// addBox content:
 		//Creating a text field for the expense name
 		nameField = new JTextField(defaultName);
-		nameField.setBounds(0, 0, 100, 200);	// a line to reconsider
+		//nameField.setBounds(0, 0, 100, 200);	// a line to reconsider
 		nameField.addFocusListener(new NameAndPriceFieldListener());
 		addPanel.add(nameField);
 		
@@ -106,7 +102,11 @@ public class AppFrame extends JFrame {
 		addButton.addActionListener(new AddButtonListener());
 		addPanel.add(addButton);
 		
-		setLayoutConstraints(1,1,1,1,3,1);
+		setLayoutConstraints(1,0,1,1,0.7,0);
+		//mainLayoutConstraints.ipadx = (int) 0.7 * baseWidth;
+		//mainLayoutConstraints.ipady = (int) 0.2 * baseHeight;
+		mainLayoutConstraints.anchor = GridBagConstraints.FIRST_LINE_END;
+		mainLayoutConstraints.fill = GridBagConstraints.HORIZONTAL;
 		mainPanel.add(addPanel,mainLayoutConstraints);
 		
 		// tableBox content
@@ -120,7 +120,7 @@ public class AppFrame extends JFrame {
 		
 		
 		this.add(mainPanel);
-		this.setResizable(false);
+		this.setResizable(true);
 		this.setVisible(true);
 			
 	}
@@ -136,8 +136,18 @@ public class AppFrame extends JFrame {
 		}
 		String [] reportHeader = {"Month", "Total"};
 		reportsTable = new JTable(new DefaultTableModel(reportsData,reportHeader));
-		reportsPanel.add(reportsTable);
-		mainPanel.add(reportsPanel, mainLayoutConstraints);
+		//reportsPanel.add(reportsTable);
+		reportsScrollPane = new JScrollPane(reportsTable);
+		reportsTable.setFillsViewportHeight(true);
+		//reportsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); //TODO: Beautify the table
+		setLayoutConstraints(0,0,1,2,0.3,1);
+		//mainLayoutConstraints.ipadx = (int) 0.3 * baseWidth;
+		//mainLayoutConstraints.ipady = baseHeight;
+		mainLayoutConstraints.ipadx = 0;
+		//mainLayoutConstraints.ipady = 0;
+		mainLayoutConstraints.anchor = GridBagConstraints.PAGE_START;
+		mainLayoutConstraints.fill = GridBagConstraints.BOTH;
+		mainPanel.add(reportsScrollPane, mainLayoutConstraints);
 	}
 
 	private void generateExpensesTable() {
@@ -182,36 +192,42 @@ public class AppFrame extends JFrame {
 		expensesTable = new JTable(new DefaultTableModel(expensesData,columnNames));		//TODO: Consider a new table model
 		tableScrollPane = new JScrollPane(expensesTable);
 		expensesTable.setFillsViewportHeight(true);
-		expensesTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); //TODO: Beautify the table
+		expensesTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS); //TODO: Beautify the table
 		
 		// Setting up columns' width
 		TableColumn namesColumn = expensesTable.getColumnModel().getColumn(0);
 		//namesColumn.setPreferredWidth(nameField.getWidth());
-		namesColumn.setPreferredWidth(380);
-		
+		namesColumn.setPreferredWidth(400);
+		/*
 		TableColumn categoryColumn = expensesTable.getColumnModel().getColumn(1);
-		categoryColumn.setPreferredWidth(60);
+		categoryColumn.setPreferredWidth(50);
 		
 		TableColumn dateColumn = expensesTable.getColumnModel().getColumn(2);
-		dateColumn.setPreferredWidth(100);
+		dateColumn.setPreferredWidth(30);
 		
 		TableColumn priceColumn = expensesTable.getColumnModel().getColumn(3);
-		priceColumn.setPreferredWidth(50);
+		priceColumn.setPreferredWidth(40);*/
+		//expensesTable.do
 		
 		//tablePanel.add(Box.createHorizontalGlue());
 		//tablePanel.add(tableScrollPane);
-		setLayoutConstraints(1,2,1,1,3,10);
+		setLayoutConstraints(1,1,1,1,0.7,0.8);
+		mainLayoutConstraints.ipadx = (int) 0.7 * baseWidth;
+		//mainLayoutConstraints.ipady = (int) 0.8 * baseHeight;
+		//mainLayoutConstraints.ipady = expensesTable.getHeight();
+		mainLayoutConstraints.anchor = GridBagConstraints.PAGE_START;
+		mainLayoutConstraints.fill = GridBagConstraints.BOTH;
 		mainPanel.add(tableScrollPane, mainLayoutConstraints);
 	}
 	
 	private void setLayoutConstraints(int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty) 
 	{
-		if (gridx != 0 ) mainLayoutConstraints.gridx = gridx;
-		if (gridy != 0 ) mainLayoutConstraints.gridy = gridy;
-		if (gridwidth != 0 ) mainLayoutConstraints.gridwidth = gridwidth;
-		if (gridwidth != 0 ) mainLayoutConstraints.gridheight = gridheight;
-		if (weightx != 0 ) mainLayoutConstraints.weightx = weightx;
-		if (weighty != 0 ) mainLayoutConstraints.weighty = weighty;
+		mainLayoutConstraints.gridx = gridx;
+		mainLayoutConstraints.gridy = gridy;
+		mainLayoutConstraints.gridwidth = gridwidth;
+		mainLayoutConstraints.gridheight = gridheight;
+		mainLayoutConstraints.weightx = weightx;
+		mainLayoutConstraints.weighty = weighty;
 	}
 	
 	//Inner listeners
@@ -316,12 +332,15 @@ public class AppFrame extends JFrame {
 	private JSpinner dateField;
 	private JFormattedTextField priceField;
 	private JScrollPane tableScrollPane;
+	private JScrollPane reportsScrollPane;
 	
 	// layout constraints
 	private GridBagConstraints mainLayoutConstraints;
 	
 	// other private members
 	private String defaultName = "Insert the expense name here...                                 ";
+	private int baseWidth = 850;
+	private int baseHeight = 400;
 	
 	// required by JFrame
 	private static final long serialVersionUID = 6750128568375064611L;
