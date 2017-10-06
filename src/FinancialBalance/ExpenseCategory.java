@@ -1,12 +1,12 @@
 package FinancialBalance;
 
 enum ExpenseCategory {
-	Other(0), 
-	School(1),
-	Medicine(2),
-	Meals(3),
-	Shopping(4),
-	Transport(5);
+	Other(0), 	// Categories are sorted by popularity apart from "Other" which should be always shown as first.
+	Food(1),
+	Meals(2),
+	Transport(3),
+	Medicine(4),
+	School(5);
 	
 	int value;
 	

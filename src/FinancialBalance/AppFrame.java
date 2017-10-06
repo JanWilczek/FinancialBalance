@@ -29,7 +29,7 @@ import java.util.Map;
  * 
  * @version 1.0
  * A class responsible for application's GUI layout.
- * Bases on box layout.
+ * Bases on GridBagLayout.
  */
 public class AppFrame extends JFrame {
 	
@@ -46,36 +46,23 @@ public class AppFrame extends JFrame {
 		
 		this.setTitle("Financial Balance");
 		
-		// Boxes:
-//		Box mainBox = Box.createHorizontalBox(); // Main box containing two sub-panels: reports panel and right panel (add panel above table)
-//		Box reportsBox = Box.createVerticalBox(); // Reports box
-//		Box rightBox = Box.createVerticalBox(); // Right box
-//		Box addBox = Box.createHorizontalBox();	// Add box
-//		Box tableBox = Box.createVerticalBox();	// Table box
-		
 		// Panels:
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new GridBagLayout());
-		//reportsPanel = new JPanel();
-		//rightPanel = new JPanel();
-		//rightPanel.setLayout(new GridBagLayout());
 		addPanel = new JPanel();
 		Border addBorder = BorderFactory.createTitledBorder("Add an expense");
 		addPanel.setBorder(addBorder);
-		//tablePanel = new JPanel();
 		
 		// Setting up the layouts
 		mainLayoutConstraints = new GridBagConstraints();
 		mainLayoutConstraints.insets = new Insets(2,2,2,2);
 
-		// reportsBox content:
+		// reportsScrollPane content:
 		generateReportsTable();
 		
-		
-		// addBox content:
+		// addPanel content:
 		//Creating a text field for the expense name
 		nameField = new JTextField(defaultName);
-		//nameField.setBounds(0, 0, 100, 200);	// a line to reconsider
 		nameField.addFocusListener(new NameAndPriceFieldListener());
 		addPanel.add(nameField);
 		
@@ -102,22 +89,13 @@ public class AppFrame extends JFrame {
 		addButton.addActionListener(new AddButtonListener());
 		addPanel.add(addButton);
 		
-		setLayoutConstraints(1,0,1,1,0.7,0);
-		//mainLayoutConstraints.ipadx = (int) 0.7 * baseWidth;
-		//mainLayoutConstraints.ipady = (int) 0.2 * baseHeight;
+		setLayoutConstraints(1,0,1,1,0.7,0);	// Second column, first row, 1x1 cell large, 70% of the GUI's width and let Java decide how much height
 		mainLayoutConstraints.anchor = GridBagConstraints.FIRST_LINE_END;
 		mainLayoutConstraints.fill = GridBagConstraints.HORIZONTAL;
 		mainPanel.add(addPanel,mainLayoutConstraints);
 		
-		// tableBox content
+		// tableScrollPane content
 		generateExpensesTable();		
-		
-		//Box layout order
-		//rightPanel.add(addPanel);
-		//rightPanel.add(tablePanel);
-		//mainPanel.add(reportsPanel);
-		//mainPanel.add(rightPanel);
-		
 		
 		this.add(mainPanel);
 		this.setResizable(true);
@@ -136,17 +114,12 @@ public class AppFrame extends JFrame {
 		}
 		String [] reportHeader = {"Month", "Total"};
 		reportsTable = new JTable(new DefaultTableModel(reportsData,reportHeader));
-		//reportsPanel.add(reportsTable);
 		reportsScrollPane = new JScrollPane(reportsTable);
-		reportsTable.setFillsViewportHeight(true);
-		//reportsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); //TODO: Beautify the table
-		setLayoutConstraints(0,0,1,2,0.3,1);
-		//mainLayoutConstraints.ipadx = (int) 0.3 * baseWidth;
-		//mainLayoutConstraints.ipady = baseHeight;
-		mainLayoutConstraints.ipadx = 0;
-		//mainLayoutConstraints.ipady = 0;
+		reportsTable.setFillsViewportHeight(true);	// Fill the remaining height of the viewport.
+		setLayoutConstraints(0,0,1,2,0.2,1);	// First row, first column, 1x2 vertical cells size, 20% of the GUI's width, all of the column's height.
+		mainLayoutConstraints.ipadx = 0;	// Reset to default value.
 		mainLayoutConstraints.anchor = GridBagConstraints.PAGE_START;
-		mainLayoutConstraints.fill = GridBagConstraints.BOTH;
+		mainLayoutConstraints.fill = GridBagConstraints.BOTH;	// Fill both horizontally and vertically the reportsScrollPane.
 		mainPanel.add(reportsScrollPane, mainLayoutConstraints);
 	}
 
@@ -188,35 +161,19 @@ public class AppFrame extends JFrame {
 			}
 		
 		//Create the table
-		//JTable expensesTable = new JTable(new ExpenseTableModel(expensesData,columnNames));
-		expensesTable = new JTable(new DefaultTableModel(expensesData,columnNames));		//TODO: Consider a new table model
+		//JTable expensesTable = new JTable(new ExpenseTableModel(expensesData,columnNames)); //TODO: Consider a new table model
+		expensesTable = new JTable(new DefaultTableModel(expensesData,columnNames));		
 		tableScrollPane = new JScrollPane(expensesTable);
 		expensesTable.setFillsViewportHeight(true);
-		expensesTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS); //TODO: Beautify the table
+		expensesTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
 		
 		// Setting up columns' width
 		TableColumn namesColumn = expensesTable.getColumnModel().getColumn(0);
-		//namesColumn.setPreferredWidth(nameField.getWidth());
-		namesColumn.setPreferredWidth(400);
-		/*
-		TableColumn categoryColumn = expensesTable.getColumnModel().getColumn(1);
-		categoryColumn.setPreferredWidth(50);
+		namesColumn.setPreferredWidth(400);	// Set the name field wide and with JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS make the next columns resized.
 		
-		TableColumn dateColumn = expensesTable.getColumnModel().getColumn(2);
-		dateColumn.setPreferredWidth(30);
-		
-		TableColumn priceColumn = expensesTable.getColumnModel().getColumn(3);
-		priceColumn.setPreferredWidth(40);*/
-		//expensesTable.do
-		
-		//tablePanel.add(Box.createHorizontalGlue());
-		//tablePanel.add(tableScrollPane);
 		setLayoutConstraints(1,1,1,1,0.7,0.8);
-		mainLayoutConstraints.ipadx = (int) 0.7 * baseWidth;
-		//mainLayoutConstraints.ipady = (int) 0.8 * baseHeight;
-		//mainLayoutConstraints.ipady = expensesTable.getHeight();
 		mainLayoutConstraints.anchor = GridBagConstraints.PAGE_START;
-		mainLayoutConstraints.fill = GridBagConstraints.BOTH;
+		mainLayoutConstraints.fill = GridBagConstraints.BOTH;		// Fill both horizontally and vertically the tableScrollPane.
 		mainPanel.add(tableScrollPane, mainLayoutConstraints);
 	}
 	
@@ -256,11 +213,12 @@ public class AppFrame extends JFrame {
 				}
 				Expense expenseToAdd = new Expense(nameField.getText(),
 						(ExpenseCategory) categoryCombo.getSelectedItem(), expenseDate, expensePrice);
-				financialBalance.addExpense(expenseToAdd);
-				//expensesTable.getModel().fireTableDataChanged();
-				//nameField.setText(defaultName);
-				//dateField.setValue(new Date());
-				//priceField.setValue("0.00");
+				financialBalance.addExpense(expenseToAdd);	// Add the expense to the main logic object.
+				//expensesTable.getModel().fireTableDataChanged();	// TODO: Update the expenses' table.
+				
+				// Reset nameField and priceField to their defaults. Leave the category and the date in case user wanted to add several objects with the same category or date.
+				nameField.setText(defaultName);
+				priceField.setValue("0.00");
 			}
 		}	
 	}
@@ -314,10 +272,11 @@ public class AppFrame extends JFrame {
 	// GUI elements
 	// panels
 	private JPanel mainPanel;
-	private JPanel reportsPanel;
-	//private JPanel rightPanel;
 	private JPanel addPanel;
-	//private JPanel tablePanel;
+	
+	// scroll panes
+	private JScrollPane tableScrollPane;
+	private JScrollPane reportsScrollPane;
 	
 	// buttons
 	private JButton addButton;
@@ -331,16 +290,14 @@ public class AppFrame extends JFrame {
 	private JComboBox<ExpenseCategory> categoryCombo;
 	private JSpinner dateField;
 	private JFormattedTextField priceField;
-	private JScrollPane tableScrollPane;
-	private JScrollPane reportsScrollPane;
 	
-	// layout constraints
+	// layout constraints used to adjust every GridBagLayout element
 	private GridBagConstraints mainLayoutConstraints;
 	
 	// other private members
-	private String defaultName = "Insert the expense name here...                                 ";
+	private String defaultName = "Insert the expense name here...               ";
 	private int baseWidth = 850;
-	private int baseHeight = 400;
+	private int baseHeight = 500;
 	
 	// required by JFrame
 	private static final long serialVersionUID = 6750128568375064611L;
