@@ -11,7 +11,7 @@
 
 package FinancialBalance;
 
-import java.util.Map;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.time.YearMonth;
@@ -24,6 +24,7 @@ class MonthlyReport {
 		this.month = month;
 		total = new BigDecimal("0.00");
 		categoriesTotals = new HashMap<ExpenseCategory, BigDecimal>();
+		for (ExpenseCategory expenseCategory : ExpenseCategory.values()) categoriesTotals.put(expenseCategory, new BigDecimal("0.00"));
 		CalculateMonthlyExpenses(expenses);
 
 	}
@@ -38,15 +39,15 @@ class MonthlyReport {
 	{
 		for (Expense expense : expenses)
 		{
-			if (expense.getDate().equals(month)) {
+			if (expense.getDate().get(Calendar.MONTH) + 1 == month.getMonth().getValue() && expense.getDate().get(Calendar.YEAR) == month.getYear()) {
 				categoriesTotals.put(expense.getCategory(), categoriesTotals.get(expense.getCategory()).add(expense.getPrice()));
-				total.add(expense.getPrice());
+				total = total.add(expense.getPrice());
 			}
 		}
 	}
 	
 	// Private members:
 	private BigDecimal total;
-	private Map<ExpenseCategory, BigDecimal> categoriesTotals;
+	private HashMap<ExpenseCategory, BigDecimal> categoriesTotals;
 	private YearMonth month;
 }

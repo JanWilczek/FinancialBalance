@@ -9,14 +9,14 @@ import java.awt.GridBagConstraints;
 import java.lang.reflect.Field;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -33,6 +33,7 @@ import java.util.Map;
  */
 public class AppFrame extends JFrame {
 	
+
 	public AppFrame(FinancialBalance financialBalance)
 	{
 		this.financialBalance = financialBalance;
@@ -79,7 +80,7 @@ public class AppFrame extends JFrame {
 		//Creating a text field for the expense name
 		nameField = new JTextField(defaultName);
 		nameField.setBounds(0, 0, 100, 200);	// a line to reconsider
-		nameField.addFocusListener(new PriceFieldListener());
+		nameField.addFocusListener(new NameAndPriceFieldListener());
 		addPanel.add(nameField);
 		
 		//Creating a drop-down menu with the expense categories
@@ -97,7 +98,7 @@ public class AppFrame extends JFrame {
 		priceField = new JFormattedTextField();
 		priceField.setValue("0.00");
 		priceField.setColumns(4);
-		priceField.addFocusListener(new PriceFieldListener());
+		priceField.addFocusListener(new NameAndPriceFieldListener());
 		addPanel.add(priceField);
 		
 		//Creating an 'Add' button to add new expenses
@@ -129,7 +130,7 @@ public class AppFrame extends JFrame {
 		int dataIndex = 0;
 		for (Map.Entry<YearMonth, MonthlyReport> monthlyReport : financialBalance.getMonthlyReports().entrySet())
 		{
-			reportsData[dataIndex][0] = monthlyReport.getKey();
+			reportsData[dataIndex][0] = monthlyReport.getKey().format(DateTimeFormatter.ofPattern("yyyy-MM"));
 			reportsData[dataIndex][1] = monthlyReport.getValue().getTotal();
 			dataIndex++;
 		}
@@ -140,6 +141,7 @@ public class AppFrame extends JFrame {
 	}
 
 	private void generateExpensesTable() {
+		//if (tableScrollPane != null) mainPanel.remove(tableScrollPane);
 		//Set the table data
 		//Get column names from Expense fields as a String array
 		String[] columnNames = null;
@@ -168,7 +170,7 @@ public class AppFrame extends JFrame {
 				{
 					expensesData[i][0] = expense.getName();
 					expensesData[i][1] = expense.getCategory();
-					expensesData[i][2] = expense.getDate();
+					expensesData[i][2] = DateFormat.getDateInstance().format(expense.getDate().getTime());
 					expensesData[i][3] = expense.getPrice();
 					i++;
 				}
@@ -239,7 +241,7 @@ public class AppFrame extends JFrame {
 				Expense expenseToAdd = new Expense(nameField.getText(),
 						(ExpenseCategory) categoryCombo.getSelectedItem(), expenseDate, expensePrice);
 				financialBalance.addExpense(expenseToAdd);
-				generateExpensesTable();
+				//expensesTable.getModel().fireTableDataChanged();
 				//nameField.setText(defaultName);
 				//dateField.setValue(new Date());
 				//priceField.setValue("0.00");
@@ -247,7 +249,7 @@ public class AppFrame extends JFrame {
 		}	
 	}
 	
-	class PriceFieldListener implements FocusListener
+	class NameAndPriceFieldListener implements FocusListener
 	{
 
 		@Override
@@ -297,9 +299,9 @@ public class AppFrame extends JFrame {
 	// panels
 	private JPanel mainPanel;
 	private JPanel reportsPanel;
-	private JPanel rightPanel;
+	//private JPanel rightPanel;
 	private JPanel addPanel;
-	private JPanel tablePanel;
+	//private JPanel tablePanel;
 	
 	// buttons
 	private JButton addButton;
@@ -320,4 +322,7 @@ public class AppFrame extends JFrame {
 	
 	// other private members
 	private String defaultName = "Insert the expense name here...                                 ";
+	
+	// required by JFrame
+	private static final long serialVersionUID = 6750128568375064611L;
 }

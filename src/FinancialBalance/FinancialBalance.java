@@ -27,6 +27,7 @@ import java.util.Set;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Calendar;
+import java.util.Collections;
 import java.time.YearMonth;
 
 /**
@@ -50,6 +51,7 @@ public class FinancialBalance {
 	{
 		expenses = new LinkedList<Expense>();
 		openExpensesFile();
+		Collections.sort(expenses);
 		
 		monthlyReports = new TreeMap<>();
 		generateMonthlyReports();
@@ -212,7 +214,7 @@ public class FinancialBalance {
 		Set<YearMonth> monthSet = new TreeSet<YearMonth>();
 		for (Expense expense : expenses)
 		{
-			monthSet.add(YearMonth.of(expense.getDate().get(Calendar.YEAR), expense.getDate().get(Calendar.MONTH)));
+			monthSet.add(YearMonth.of(expense.getDate().get(Calendar.YEAR), (expense.getDate().get(Calendar.MONTH) + 1)));
 		}
 		for (YearMonth month : monthSet)
 		{

@@ -2,12 +2,13 @@ package FinancialBalance;
 
 import java.math.BigDecimal;
 import java.util.Calendar;
+import java.lang.Comparable;
 
 /**
  * A class representing an expense.
  * @author Jan Wilczek
  */
-class Expense {
+class Expense implements Comparable<Expense> {
 	private String name;
 	private ExpenseCategory category;
 	private Calendar date;
@@ -40,6 +41,14 @@ class Expense {
 	}
 	
 	// Public member functions
+	@Override
+	public int compareTo(Expense expense)
+	{
+		if (!this.getDate().getTime().equals(expense.getDate().getTime())) return this.getDate().getTime().compareTo(expense.getDate().getTime());
+		if (!this.getPrice().equals(expense.getPrice())) return this.getPrice().compareTo(expense.getPrice());
+		return this.getName().compareTo(expense.getName());
+	}
+	
 	@Override
 	public String toString()
 	{
