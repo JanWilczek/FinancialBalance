@@ -156,7 +156,7 @@ public class FinancialBalance {
 	 * Deletes the given expense.
 	 * @param expenseToDelete
 	 */
-	public boolean deleteExpense(Expense expenseToDelete)
+	public boolean deleteExpense(Expense expenseToDelete)		// TODO: reimplement
 	{
 		expenses.remove(expenseToDelete);
 		try

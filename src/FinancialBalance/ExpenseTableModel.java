@@ -3,12 +3,14 @@ package FinancialBalance;
 import javax.swing.table.AbstractTableModel;
 
 public class ExpenseTableModel extends AbstractTableModel {
+	private static final long serialVersionUID = -5713013989357777200L;
 	private String [] columnNames;
 	private Object[][] data;
 	
 	//Public constructor
 	public ExpenseTableModel(Object[][] data, String[] columnNames)
 	{
+		super();
 		if (data == null)
 		{
 			throw new NullPointerException("Data passed to the table is null.");
@@ -33,9 +35,8 @@ public class ExpenseTableModel extends AbstractTableModel {
 	}
 
 	@Override
-	public Object getValueAt(int arg0, int arg1) {
-		// TODO Auto-generated method stub
-		return null;
+	public Object getValueAt(int row, int column) {
+		return data[row][column];
 	}
 
 }

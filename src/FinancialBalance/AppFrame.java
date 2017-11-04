@@ -14,7 +14,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
@@ -95,7 +96,8 @@ public class AppFrame extends JFrame {
 		mainPanel.add(addPanel,mainLayoutConstraints);
 		
 		// tableScrollPane content
-		generateExpensesTable();		
+		generateExpensesTable();
+		expensesTable.addKeyListener(new DeletePressedListener());
 		
 		this.add(mainPanel);
 		this.setResizable(true);
@@ -142,6 +144,7 @@ public class AppFrame extends JFrame {
 			se.printStackTrace();
 		}
 		
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 		//Get the expense data as a two-dimensional Object array
 		Object[][] expensesData = null;
 		if (columnNames != null) 
@@ -153,7 +156,7 @@ public class AppFrame extends JFrame {
 				{
 					expensesData[i][0] = expense.getName();
 					expensesData[i][1] = expense.getCategory();
-					expensesData[i][2] = DateFormat.getDateInstance().format(expense.getDate().getTime());
+					expensesData[i][2] = simpleDateFormat.format(expense.getDate().getTime());
 					expensesData[i][3] = expense.getPrice();
 					i++;
 				}
@@ -161,8 +164,7 @@ public class AppFrame extends JFrame {
 			}
 		
 		//Create the table
-		//JTable expensesTable = new JTable(new ExpenseTableModel(expensesData,columnNames)); //TODO: Consider a new table model
-		expensesTable = new JTable(new DefaultTableModel(expensesData,columnNames));		
+		expensesTable = new JTable(new DefaultTableModel(expensesData,columnNames));
 		tableScrollPane = new JScrollPane(expensesTable);
 		expensesTable.setFillsViewportHeight(true);
 		expensesTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
@@ -266,6 +268,42 @@ public class AppFrame extends JFrame {
 	}
 	
 	// private members
+	// table event listener
+	private class DeletePressedListener implements KeyListener {
+
+		@Override
+		public void keyPressed(KeyEvent arg0) {}
+
+		@Override
+		public void keyReleased(KeyEvent ke) {
+			if (ke.getKeyCode()==KeyEvent.VK_DELETE && expensesTable.getSelectedRowCount() > 0)
+			{
+				int decision = JOptionPane.showConfirmDialog(mainPanel, "Are You sure, You want to delete selected expense(s) from database?", "Delete selected expense(s)", JOptionPane.YES_NO_OPTION);
+				if (decision == JOptionPane.YES_NO_OPTION)
+				{
+					DefaultTableModel model = (DefaultTableModel) expensesTable.getModel();
+					
+					for (int i : expensesTable.getSelectedRows()) {
+						Calendar cal = Calendar.getInstance();
+						SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+						try{cal.setTime(sdf.parse((String)expensesTable.getValueAt(i, 2)));}
+						catch(ParseException pe){pe.printStackTrace(); return;	}
+						Expense expenseToDelete = new Expense((String) expensesTable.getValueAt(i, 0),
+																(ExpenseCategory) expensesTable.getValueAt(i, 1),
+																cal,
+																(BigDecimal)expensesTable.getValueAt(i, 3));
+						financialBalance.deleteExpense(expenseToDelete);
+						model.removeRow(i);
+					}
+				}
+			}
+		}
+
+		@Override
+		public void keyTyped(KeyEvent arg0) {}
+		
+	}
+			
 	// inner application logic
 	private FinancialBalance financialBalance;
 	
