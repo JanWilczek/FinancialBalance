@@ -100,6 +100,7 @@ public class AppFrame extends JFrame {
 		expensesTable.addKeyListener(new DeletePressedListener());
 		
 		this.add(mainPanel);
+		this.addWindowListener(new WindowClosingListener());
 		this.setResizable(true);
 		this.setVisible(true);
 			
@@ -215,9 +216,12 @@ public class AppFrame extends JFrame {
 				}
 				Expense expenseToAdd = new Expense(nameField.getText(),
 						(ExpenseCategory) categoryCombo.getSelectedItem(), expenseDate, expensePrice);
-				financialBalance.addExpense(expenseToAdd);	// Add the expense to the main logic object.
-				//expensesTable.getModel().fireTableDataChanged();	// TODO: Update the expenses' table.
-				
+				int index = financialBalance.addExpense(expenseToAdd);	// Add the expense to the main logic object.
+				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+				DefaultTableModel model = (DefaultTableModel) expensesTable.getModel();
+				//model.addRow(new Object[] {expenseToAdd.getName(), expenseToAdd.getCategory(), simpleDateFormat.format(expenseToAdd.getDate().getTime()), expenseToAdd.getPrice()});	// TODO: Insert the row at the beginning not at the end.
+				model.insertRow(index, new Object[] {expenseToAdd.getName(), expenseToAdd.getCategory(), simpleDateFormat.format(expenseToAdd.getDate().getTime()), expenseToAdd.getPrice()});	// TODO: Insert the row at the beginning not at the end.
+
 				// Reset nameField and priceField to their defaults. Leave the category and the date in case user wanted to add several objects with the same category or date.
 				nameField.setText(defaultName);
 				priceField.setValue("0.00");
@@ -281,19 +285,22 @@ public class AppFrame extends JFrame {
 				int decision = JOptionPane.showConfirmDialog(mainPanel, "Are You sure, You want to delete selected expense(s) from database?", "Delete selected expense(s)", JOptionPane.YES_NO_OPTION);
 				if (decision == JOptionPane.YES_NO_OPTION)
 				{
-					DefaultTableModel model = (DefaultTableModel) expensesTable.getModel();
-					
-					for (int i : expensesTable.getSelectedRows()) {
+					//DefaultTableModel model = (DefaultTableModel) expensesTable.getModel();
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+					int[] selectedRows = expensesTable.getSelectedRows();
+					for (int i : selectedRows) {
 						Calendar cal = Calendar.getInstance();
-						SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 						try{cal.setTime(sdf.parse((String)expensesTable.getValueAt(i, 2)));}
 						catch(ParseException pe){pe.printStackTrace(); return;	}
 						Expense expenseToDelete = new Expense((String) expensesTable.getValueAt(i, 0),
 																(ExpenseCategory) expensesTable.getValueAt(i, 1),
 																cal,
 																(BigDecimal)expensesTable.getValueAt(i, 3));
-						financialBalance.deleteExpense(expenseToDelete);
-						model.removeRow(i);
+						boolean successDelete = financialBalance.deleteExpense(expenseToDelete);
+						if (successDelete){ 
+							SwingUtilities.invokeLater(new RowRemover(i));
+							//if (i==selectedRows[selectedRows.length - 1]) break;	// An exception is thrown when the last row is being deleted
+						}
 					}
 				}
 			}
@@ -301,7 +308,48 @@ public class AppFrame extends JFrame {
 
 		@Override
 		public void keyTyped(KeyEvent arg0) {}
+	}
+	
+	// window closed listener
+	private class WindowClosingListener implements WindowListener{
+
+		@Override
+		public void windowActivated(WindowEvent e) {}
+
+		@Override
+		public void windowClosed(WindowEvent e) {}
+
+		@Override
+		public void windowClosing(WindowEvent e) {
+			financialBalance.updateDatabase();			
+		}
+
+		@Override
+		public void windowDeactivated(WindowEvent e) {}
+
+		@Override
+		public void windowDeiconified(WindowEvent e) {}
+
+		@Override
+		public void windowIconified(WindowEvent e) {}
+
+		@Override
+		public void windowOpened(WindowEvent e) {}
+	}
+	
+	// a row removing utility
+	private class RowRemover implements Runnable{
+		private int rowToRemove;
 		
+		public RowRemover(int rowToRemove){
+			this.rowToRemove = rowToRemove;
+		}
+		
+		@Override
+		public void run(){
+			DefaultTableModel model = (DefaultTableModel) expensesTable.getModel();
+			model.removeRow(rowToRemove);
+		}
 	}
 			
 	// inner application logic

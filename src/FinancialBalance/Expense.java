@@ -50,14 +50,23 @@ class Expense implements Comparable<Expense> {
 	}
 	
 	@Override
+	public boolean equals(Object o)
+	{
+		Expense expense = (Expense) o;
+		Calendar cal = expense.getDate();
+		boolean isDateEqual = cal.get(Calendar.YEAR)==this.date.get(Calendar.YEAR) && cal.get(Calendar.MONTH)==this.date.get(Calendar.MONTH) && cal.get(Calendar.DAY_OF_MONTH)==this.date.get(Calendar.DAY_OF_MONTH);
+		return isDateEqual && this.getPrice().equals(expense.getPrice()) && this.getCategory().equals(expense.getCategory()) && this.getName().equals(expense.getName());
+	}
+	
+	@Override
 	public String toString()
 	{
-		return getName() + " " + getCategory() + " " + getDate() + " " + getPrice() + System.lineSeparator(); //TODO: insert a cross-platform line separator
+		return getName() + " " + getCategory() + " " + getDate() + " " + getPrice() + System.lineSeparator();
 	}
 	
 	public String toDatabaseString()
 	{
-		return getName() + "/" + getCategory() + "/" + getDate().getTime().getTime() + "/" + getPrice() + System.lineSeparator(); //TODO: insert a cross-platform line separator
+		return getName() + "/" + getCategory() + "/" + getDate().getTime().getTime() + "/" + getPrice() + System.lineSeparator();
 	}
 	
 	// Getters

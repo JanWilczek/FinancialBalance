@@ -46,6 +46,7 @@ public class FinancialBalance {
 	private String expensesFilePath = "expenses.txt";
 	private Path expensesFile;
 	private final static Charset charset = Charset.forName("ISO-8859-1");
+	private boolean databaseUpdateScheduled = false; ///< a flag informing whether database needs an update 
 	
 	FinancialBalance()
 	{
@@ -127,51 +128,57 @@ public class FinancialBalance {
 	// Public members functions
 	
 	/**
-	 * Adds an expense to the internal container and to the database file. 
+	 * Adds an expense to the internal container.
+	 * A call to this function does not add an according record in the database. In order to do that updateDatbase() needs to be called after, what is marked by databaseUpdateScheduled flag.
 	 * @param expenseToAdd
+	 * @return index at which the expense was added
 	 */
-	public void addExpense(Expense expenseToAdd)
+	public int addExpense(Expense expenseToAdd)
 	{
 		expenses.add(expenseToAdd);
-		try
-		{
-			Files.write(expensesFile, expenseToAdd.toDatabaseString().getBytes(charset), StandardOpenOption.CREATE, StandardOpenOption.APPEND);		//TODO: Change file input implementation
-		}
-		catch(IOException ioe)
-		{
-			ioe.printStackTrace();
-			System.err.println(ioe.getMessage());
-		}
-		catch (UnsupportedOperationException uoe) 
-		{
-			uoe.printStackTrace();
-		}
-		catch (SecurityException se) 
-		{
-			se.printStackTrace();
-		}
+		//TODO: sort the expenses. Otherwise returning index won't have much sense.
+		databaseUpdateScheduled = true;
+		return expenses.indexOf(expenseToAdd);
 	}
 	
 	/**
-	 * Deletes the given expense.
+	 * Deletes the given expense from the internal container.
+	 * A call to this function does not delete the according record in the database. In order to do that updateDatbase() needs to be called after, what is marked by databaseUpdateScheduled flag.
 	 * @param expenseToDelete
+	 * @return boolean value stating if the expense has been found and deleted
 	 */
 	public boolean deleteExpense(Expense expenseToDelete)		// TODO: reimplement
 	{
-		expenses.remove(expenseToDelete);
-		try
-		{
-			List<String> expensesStrings = Files.readAllLines(expensesFile);
-			expensesStrings.remove(expenseToDelete.toDatabaseString());
-			Files.write(expensesFile, expensesStrings, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
-			
+		for (Expense expense : expenses)
+			if (expense.equals(expenseToDelete))
+			{
+				expenses.remove(expense);
+				databaseUpdateScheduled = true;
+				return true;
+			}
+		return false;
+	}
+	
+	/**
+	 * Updates the database file objects when databaseUpdateScheduled flag is true.
+	 */
+	public void updateDatabase()
+	{
+		if (databaseUpdateScheduled) {
+			try {
+				Files.deleteIfExists(expensesFile);
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
+			for (Expense expense : expenses) {
+				try {
+					Files.write(expensesFile, expense.toDatabaseString().getBytes(charset), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+				} catch (IOException ioe) {
+					ioe.printStackTrace();
+				} 
+			}
+
 		}
-		catch (IOException ioe)
-		{
-			ioe.printStackTrace();
-			return false;
-		}
-		return true;
 	}
 	
 	/**
@@ -199,7 +206,7 @@ public class FinancialBalance {
 	{
 		expenses.clear();
 		try {
-			Files.delete(expensesFile);
+			Files.deleteIfExists(expensesFile);
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
