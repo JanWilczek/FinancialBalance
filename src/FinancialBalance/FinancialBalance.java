@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.time.YearMonth;
 
 /**
@@ -54,7 +55,7 @@ public class FinancialBalance {
 		openExpensesFile();
 		Collections.sort(expenses);
 		
-		monthlyReports = new TreeMap<>();
+		monthlyReports = new TreeMap<>(new ReverseDateComparator());
 		generateMonthlyReports();
 	}
 	
@@ -136,7 +137,7 @@ public class FinancialBalance {
 	public int addExpense(Expense expenseToAdd)
 	{
 		expenses.add(expenseToAdd);
-		//TODO: sort the expenses. Otherwise returning index won't have much sense.
+		Collections.sort(expenses);		// TODO: [RESEARCH] Is there a better way to do it than sorting all elements? Is sorting them costly?
 		databaseUpdateScheduled = true;
 		return expenses.indexOf(expenseToAdd);
 	}
@@ -147,7 +148,7 @@ public class FinancialBalance {
 	 * @param expenseToDelete
 	 * @return boolean value stating if the expense has been found and deleted
 	 */
-	public boolean deleteExpense(Expense expenseToDelete)		// TODO: reimplement
+	public boolean deleteExpense(Expense expenseToDelete)
 	{
 		for (Expense expense : expenses)
 			if (expense.equals(expenseToDelete))
@@ -182,8 +183,8 @@ public class FinancialBalance {
 	}
 	
 	/**
-	 * Returns the internal container of expenses.
-	 * TODO: Reconsider the use of this method.
+	 * @return expenses
+	 *  the internal container of expenses
 	 */
 	public List<Expense> getExpenses()
 	{
@@ -226,6 +227,18 @@ public class FinancialBalance {
 		for (YearMonth month : monthSet)
 		{
 			monthlyReports.put(month, new MonthlyReport(month, expenses));
+		}
+	}
+	
+	// helper comparator class
+	// The months are sorted in descending order for GUI purposes.
+	private class ReverseDateComparator implements Comparator<YearMonth>
+	{
+		@Override
+		public int compare(YearMonth month1, YearMonth month2) {
+			if (month1.getYear() > month2.getYear()) return -1;
+			else if (month1.getYear() < month2.getYear()) return 1;
+			else return -month1.compareTo(month2);
 		}
 	}
 }

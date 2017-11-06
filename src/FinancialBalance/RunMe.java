@@ -16,6 +16,7 @@ package FinancialBalance;
 public class RunMe {
 	public static void main(String [] args){
 		FinancialBalance fb = new FinancialBalance();
+		@SuppressWarnings("unused")
 		AppFrame frame = new AppFrame(fb);
 	}
 }

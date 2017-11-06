@@ -44,7 +44,7 @@ class Expense implements Comparable<Expense> {
 	@Override
 	public int compareTo(Expense expense)
 	{
-		if (!this.getDate().getTime().equals(expense.getDate().getTime())) return this.getDate().getTime().compareTo(expense.getDate().getTime());
+		if (!this.getDate().getTime().equals(expense.getDate().getTime())) return -this.getDate().getTime().compareTo(expense.getDate().getTime());	// The first expense to be stored is the newest one (for GUI purposes). It's not a problem with LinekdList.
 		if (!this.getPrice().equals(expense.getPrice())) return this.getPrice().compareTo(expense.getPrice());
 		return this.getName().compareTo(expense.getName());
 	}

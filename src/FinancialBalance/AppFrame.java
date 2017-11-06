@@ -106,6 +106,9 @@ public class AppFrame extends JFrame {
 			
 	}
 
+	/**
+	 * Generate the reports table.
+	 */
 	private void generateReportsTable() {
 		Object [][] reportsData = new Object [financialBalance.getMonthlyReports().size()][2];
 		int dataIndex = 0;
@@ -125,7 +128,10 @@ public class AppFrame extends JFrame {
 		mainLayoutConstraints.fill = GridBagConstraints.BOTH;	// Fill both horizontally and vertically the reportsScrollPane.
 		mainPanel.add(reportsScrollPane, mainLayoutConstraints);
 	}
-
+	
+	/**
+	 * Generate the expenses table.
+	 */
 	private void generateExpensesTable() {
 		//if (tableScrollPane != null) mainPanel.remove(tableScrollPane);
 		//Set the table data
@@ -180,6 +186,9 @@ public class AppFrame extends JFrame {
 		mainPanel.add(tableScrollPane, mainLayoutConstraints);
 	}
 	
+	/**
+	 * 	Helper method changing layout constraints for proper GUI elements' placement.
+	 */
 	private void setLayoutConstraints(int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty) 
 	{
 		mainLayoutConstraints.gridx = gridx;
@@ -229,7 +238,9 @@ public class AppFrame extends JFrame {
 		}	
 	}
 	
-	class NameAndPriceFieldListener implements FocusListener
+	// private members
+	// a helper inner class responsible for user-friendly text box interaction
+	private class NameAndPriceFieldListener implements FocusListener
 	{
 
 		@Override
@@ -271,7 +282,6 @@ public class AppFrame extends JFrame {
 		
 	}
 	
-	// private members
 	// table event listener
 	private class DeletePressedListener implements KeyListener {
 
@@ -285,10 +295,11 @@ public class AppFrame extends JFrame {
 				int decision = JOptionPane.showConfirmDialog(mainPanel, "Are You sure, You want to delete selected expense(s) from database?", "Delete selected expense(s)", JOptionPane.YES_NO_OPTION);
 				if (decision == JOptionPane.YES_NO_OPTION)
 				{
-					//DefaultTableModel model = (DefaultTableModel) expensesTable.getModel();
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 					int[] selectedRows = expensesTable.getSelectedRows();
-					for (int i : selectedRows) {
+					int[] rowsToDelete = new int[selectedRows.length];
+					int j = 0;
+					for (int i : selectedRows ) {
 						Calendar cal = Calendar.getInstance();
 						try{cal.setTime(sdf.parse((String)expensesTable.getValueAt(i, 2)));}
 						catch(ParseException pe){pe.printStackTrace(); return;	}
@@ -297,11 +308,9 @@ public class AppFrame extends JFrame {
 																cal,
 																(BigDecimal)expensesTable.getValueAt(i, 3));
 						boolean successDelete = financialBalance.deleteExpense(expenseToDelete);
-						if (successDelete){ 
-							SwingUtilities.invokeLater(new RowRemover(i));
-							//if (i==selectedRows[selectedRows.length - 1]) break;	// An exception is thrown when the last row is being deleted
-						}
+						if (successDelete) rowsToDelete[j++] = i;
 					}
+					SwingUtilities.invokeLater(new RowRemover(rowsToDelete));	// schedules the row-removing process
 				}
 			}
 		}
@@ -337,18 +346,22 @@ public class AppFrame extends JFrame {
 		public void windowOpened(WindowEvent e) {}
 	}
 	
-	// a row removing utility
+	// a row removing utility working on a separate thread
 	private class RowRemover implements Runnable{
-		private int rowToRemove;
+		private int[] rowsToRemove;
 		
-		public RowRemover(int rowToRemove){
-			this.rowToRemove = rowToRemove;
+		public RowRemover(int[] rowsToRemove){
+			this.rowsToRemove = rowsToRemove;
 		}
 		
 		@Override
 		public void run(){
-			DefaultTableModel model = (DefaultTableModel) expensesTable.getModel();
-			model.removeRow(rowToRemove);
+			synchronized (expensesTable){
+				DefaultCellEditor defaultCellEditor = (DefaultCellEditor)expensesTable.getCellEditor(); 
+				if (defaultCellEditor != null) defaultCellEditor.stopCellEditing();	// IMPORTANT! Otherwise the operation won't be completed successfully
+				DefaultTableModel model = (DefaultTableModel) expensesTable.getModel();
+				for (int i = rowsToRemove.length-1; i>=0; i--) model.removeRow(rowsToRemove[i]);	// Rows are removed in lowering index order, otherwise the inappropriate rows would be removed.
+			}
 		}
 	}
 			
