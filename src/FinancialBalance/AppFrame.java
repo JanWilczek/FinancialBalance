@@ -234,6 +234,8 @@ public class AppFrame extends JFrame {
 				// Reset nameField and priceField to their defaults. Leave the category and the date in case user wanted to add several objects with the same category or date.
 				nameField.setText(defaultName);
 				priceField.setValue("0.00");
+				
+				// TODO: Update monthly reports' table.
 			}
 		}	
 	}
@@ -312,6 +314,8 @@ public class AppFrame extends JFrame {
 					}
 					SwingUtilities.invokeLater(new RowRemover(rowsToDelete));	// schedules the row-removing process
 				}
+				
+				// TODO: Update monthly reports' table.
 			}
 		}
 

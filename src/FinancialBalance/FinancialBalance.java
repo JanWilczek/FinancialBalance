@@ -138,6 +138,7 @@ public class FinancialBalance {
 	{
 		expenses.add(expenseToAdd);
 		Collections.sort(expenses);		// TODO: [RESEARCH] Is there a better way to do it than sorting all elements? Is sorting them costly?
+		generateMonthlyReports();
 		databaseUpdateScheduled = true;
 		return expenses.indexOf(expenseToAdd);
 	}
@@ -154,6 +155,7 @@ public class FinancialBalance {
 			if (expense.equals(expenseToDelete))
 			{
 				expenses.remove(expense);
+				generateMonthlyReports();
 				databaseUpdateScheduled = true;
 				return true;
 			}
