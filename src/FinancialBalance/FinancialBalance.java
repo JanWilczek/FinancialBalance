@@ -15,17 +15,11 @@
 
 package FinancialBalance;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.*;
 import java.util.List;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Set;
-import java.math.BigDecimal;
-import java.util.Date;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -44,86 +38,20 @@ import java.time.YearMonth;
 public class FinancialBalance {
 	private List<Expense> expenses;
 	private Map<YearMonth, MonthlyReport> monthlyReports;
-	private String expensesFilePath = "expenses.txt";
-	private Path expensesFile;
-	private final static Charset charset = Charset.forName("ISO-8859-1");
+	private DataProvider dataProvider;
+
+	
 	private boolean databaseUpdateScheduled = false; ///< a flag informing whether database needs an update 
 	
 	FinancialBalance()
 	{
-		expenses = new LinkedList<Expense>();
-		openExpensesFile();
+		dataProvider = new TextfileDataProvider();
+		expenses = dataProvider.getExpenses();
+		
 		Collections.sort(expenses);
 		
 		monthlyReports = new TreeMap<>(new ReverseDateComparator());
 		generateMonthlyReports();
-	}
-	
-	/**
-	 * Opens the database file or creates a new one.
-	 */
-	private void openExpensesFile()
-	{
-		expensesFile = Paths.get(expensesFilePath);
-		if (Files.exists(expensesFile))
-		{
-			// Read all expenses from the .txt file
-			try {
-				List<String> expensesStrings = Files.readAllLines(expensesFile, charset);
-				if (expensesStrings.size() > 0) {
-					readExpensesFromFile(expensesStrings);
-				}
-			} catch (IOException ioe) {
-				ioe.printStackTrace();
-			} 
-		}
-		else
-		{
-			try 
-			{
-				expensesFile = Files.createFile(expensesFile);
-			} 
-			catch (FileAlreadyExistsException fae) 
-			{
-				fae.printStackTrace();
-			}
-			catch (IOException ioe) 
-			{
-				ioe.printStackTrace();
-			}
-			catch (UnsupportedOperationException uoe) 
-			{
-				uoe.printStackTrace();
-			}
-			catch (SecurityException se) 
-			{
-				se.printStackTrace();
-			}
-		}
-	}
-
-	/**
-	 * Reads database content from a list of lines (strings) to the internal container.
-	 * @param expensesStrings
-	 */
-	private void readExpensesFromFile(List<String> expensesStrings) {
-		String[] expenseString = new String[4];
-		for (String s : expensesStrings) {
-			Expense expense = new Expense();
-			expenseString = s.split("/");
-			expense.setName(expenseString[0]);
-			expense.setCategory(ExpenseCategory.valueOf(expenseString[1]));
-			try {
-				//expense.setDate(DateFormat.getDateInstance().parse(expenseString[2]));
-				Calendar date = Calendar.getInstance();
-				date.setTime(new Date(Long.parseLong(expenseString[2])));
-				expense.setDate(date);
-			} catch (NumberFormatException nfe) {
-				nfe.printStackTrace();
-			}
-			expense.setPrice(new BigDecimal(expenseString[3]));
-			expenses.add(expense);
-		}
 	}
 	
 	// Public members functions
@@ -163,24 +91,30 @@ public class FinancialBalance {
 	}
 	
 	/**
+	 * Deletes expense at the given index from the internal container.
+	 * A call to this function does not delete the according record in the database. In order to do that updateDatbase() needs to be called after, what is marked by databaseUpdateScheduled flag.
+	 * @param expenseToDeleteIndex
+	 * @return boolean value stating if the expense has been found and deleted
+	 */
+	public boolean deleteExpense(int expenseToDeleteIndex)
+	{
+		if (expenseToDeleteIndex > 0 && expenseToDeleteIndex < expenses.size())
+		{
+				expenses.remove(expenseToDeleteIndex);
+				generateMonthlyReports();
+				databaseUpdateScheduled = true;
+				return true;
+		}
+		return false;
+	}
+	
+	/**
 	 * Updates the database file objects when databaseUpdateScheduled flag is true.
 	 */
 	public void updateDatabase()
 	{
 		if (databaseUpdateScheduled) {
-			try {
-				Files.deleteIfExists(expensesFile);
-			} catch (IOException ioe) {
-				ioe.printStackTrace();
-			}
-			for (Expense expense : expenses) {
-				try {
-					Files.write(expensesFile, expense.toDatabaseString().getBytes(charset), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-				} catch (IOException ioe) {
-					ioe.printStackTrace();
-				} 
-			}
-
+			dataProvider.updateDatabase(expenses);
 		}
 	}
 	
@@ -208,11 +142,7 @@ public class FinancialBalance {
 	public void clearDatabase()
 	{
 		expenses.clear();
-		try {
-			Files.deleteIfExists(expensesFile);
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
+		dataProvider.clearDatabase();
 	}
 	
 	/**

@@ -228,14 +228,12 @@ public class AppFrame extends JFrame {
 				int index = financialBalance.addExpense(expenseToAdd);	// Add the expense to the main logic object.
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 				DefaultTableModel model = (DefaultTableModel) expensesTable.getModel();
-				//model.addRow(new Object[] {expenseToAdd.getName(), expenseToAdd.getCategory(), simpleDateFormat.format(expenseToAdd.getDate().getTime()), expenseToAdd.getPrice()});	// TODO: Insert the row at the beginning not at the end.
-				model.insertRow(index, new Object[] {expenseToAdd.getName(), expenseToAdd.getCategory(), simpleDateFormat.format(expenseToAdd.getDate().getTime()), expenseToAdd.getPrice()});	// TODO: Insert the row at the beginning not at the end.
+
+				model.insertRow(index, new Object[] {expenseToAdd.getName(), expenseToAdd.getCategory(), simpleDateFormat.format(expenseToAdd.getDate().getTime()), expenseToAdd.getPrice()});
 
 				// Reset nameField and priceField to their defaults. Leave the category and the date in case user wanted to add several objects with the same category or date.
 				nameField.setText(defaultName);
 				priceField.setValue("0.00");
-				
-				// TODO: Update monthly reports' table.
 			}
 		}	
 	}
