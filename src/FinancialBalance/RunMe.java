@@ -8,6 +8,9 @@
 
 package FinancialBalance;
 
+import FinancialBalance.threading.*;
+import javax.swing.SwingUtilities;
+
 /**
  * The main thread class.
  * @author Jan Wilczek
@@ -16,7 +19,7 @@ package FinancialBalance;
 public class RunMe {
 	public static void main(String [] args){
 		FinancialBalance fb = new FinancialBalance();
-		@SuppressWarnings("unused")
-		AppFrame frame = new AppFrame(fb);
+		SwingUtilities.invokeLater(new AppFrameRunner(fb));
+		SwingUtilities.invokeLater(new PlotFrameRunner(fb.getMonthlyReports()));
 	}
 }

@@ -17,7 +17,7 @@ import java.util.List;
 import java.time.YearMonth;
 import java.math.BigDecimal;
 
-class MonthlyReport {
+public class MonthlyReport {
 	
 	public MonthlyReport(YearMonth month, List<Expense> expenses)
 	{
