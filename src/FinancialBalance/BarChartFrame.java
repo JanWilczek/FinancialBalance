@@ -21,7 +21,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
  * 
  * A class responsible for drawing monthly expense statistics.
  */
-public class BarChartFrame extends JFrame{
+public class BarChartFrame extends JPanel{
 	private static final long serialVersionUID = 459847795940849256L;
 	private Map<YearMonth, MonthlyReport> monthlyReports;
 	private YearMonth month;
@@ -31,10 +31,11 @@ public class BarChartFrame extends JFrame{
 	
 	public BarChartFrame(Map<YearMonth, MonthlyReport> monthlyReports)
 	{
+		super();
 		this.monthlyReports = monthlyReports;
-		this.setTitle("Financial Balance Statistics");
-		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		this.setSize(baseWidth, baseHeight);
+		//this.setTitle("Financial Balance Statistics");
+		//this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		//this.setSize(baseWidth, baseHeight);
 		
 		month = YearMonth.now();
 		
@@ -42,11 +43,11 @@ public class BarChartFrame extends JFrame{
 		barChart = ChartFactory.createBarChart("Monthly expenses by category", "Month", "Totals", createDataset(), PlotOrientation.VERTICAL, true, true, false);
 		ChartPanel chartPanel = new ChartPanel(barChart);
 		this.add(chartPanel);
-		
+		/*
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		Dimension dim = tk.getScreenSize();
 		this.setLocation(dim.width / 4 - baseWidth / 2, dim.height / 4 - baseHeight / 2);
-		this.setVisible(true);
+		this.setVisible(true);*/
 	}
 	
 	private DefaultCategoryDataset createDataset()
@@ -55,7 +56,7 @@ public class BarChartFrame extends JFrame{
 		ExpenseCategory[] categories = ExpenseCategory.values();
 		MonthlyReport report = monthlyReports.get(month);
 		for (ExpenseCategory category : categories)
-			monthTotalsDataset.addValue(report.getCategoryTotal(category),month,category);
+			monthTotalsDataset.addValue(report.getCategoryTotal(category),category,month);
 		return monthTotalsDataset;
 	}
 }

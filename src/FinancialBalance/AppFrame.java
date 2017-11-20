@@ -13,6 +13,8 @@ import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
+import FinancialBalance.threading.PlotFrameRunner;
+
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -98,6 +100,21 @@ public class AppFrame extends JFrame {
 		// tableScrollPane content
 		generateExpensesTable();
 		expensesTable.addKeyListener(new DeletePressedListener());
+		
+		// Create menu
+		menuBar = new JMenuBar();
+		
+		viewMenu = new JMenu("View");
+		viewMenu.setMnemonic(KeyEvent.VK_V);
+		viewMenu.getAccessibleContext().setAccessibleDescription("View additional windows.");
+		menuBar.add(viewMenu);
+		
+		statisticsMenuItem = new JMenuItem("Statistics", KeyEvent.VK_S);
+		statisticsMenuItem.getAccessibleContext().setAccessibleDescription("Show statistics of all expenses.");
+		statisticsMenuItem.addActionListener(new StatisticsMenuListener());
+		viewMenu.add(statisticsMenuItem);
+		
+		this.setJMenuBar(menuBar);
 		
 		this.add(mainPanel);
 		this.addWindowListener(new WindowClosingListener());
@@ -348,6 +365,16 @@ public class AppFrame extends JFrame {
 		public void windowOpened(WindowEvent e) {}
 	}
 	
+	class StatisticsMenuListener implements ActionListener{
+		@Override
+		public void actionPerformed(ActionEvent ae) {
+			if (ae.getSource().equals(statisticsMenuItem)){
+				SwingUtilities.invokeLater(new PlotFrameRunner(financialBalance.getMonthlyReports()));
+			}
+			
+		}
+	}
+	
 	// a row removing utility working on a separate thread
 	private class RowRemover implements Runnable{
 		private int[] rowsToRemove;
@@ -391,6 +418,11 @@ public class AppFrame extends JFrame {
 	private JComboBox<ExpenseCategory> categoryCombo;
 	private JSpinner dateField;
 	private JFormattedTextField priceField;
+	
+	// Menu components
+	private JMenuBar menuBar;
+	private JMenu viewMenu;
+	private JMenuItem statisticsMenuItem;
 	
 	// layout constraints used to adjust every GridBagLayout element
 	private GridBagConstraints mainLayoutConstraints;

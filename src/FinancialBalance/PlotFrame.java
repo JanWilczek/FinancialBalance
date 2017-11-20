@@ -22,7 +22,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
  * 
  * A class responsible for drawing expenses history plot.
  */
-public class PlotFrame extends JFrame{
+public class PlotFrame extends JPanel{
 	private static final long serialVersionUID = -615419300303111875L;
 	private Map<YearMonth, MonthlyReport> monthlyReports;
 	private int baseWidth = 600;
@@ -31,9 +31,10 @@ public class PlotFrame extends JFrame{
 	
 	public PlotFrame(Map<YearMonth, MonthlyReport> monthlyReports)
 	{
+		super();
 		this.monthlyReports = monthlyReports;
-		this.setTitle("Financial Balance Statistics");
-		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		//his.setTitle("Financial Balance Statistics");
+		//this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.setSize(baseWidth, baseHeight);
 		
 		// Creating the chart
@@ -41,10 +42,10 @@ public class PlotFrame extends JFrame{
 		ChartPanel chartPanel = new ChartPanel(lineChart);
 		this.add(chartPanel);
 		
-		Toolkit tk = Toolkit.getDefaultToolkit();
+		/*Toolkit tk = Toolkit.getDefaultToolkit();
 		Dimension dim = tk.getScreenSize();
 		this.setLocation(dim.width / 2 - baseWidth / 2, dim.height / 2 - baseHeight / 2);
-		this.setVisible(true);
+		this.setVisible(true);*/
 	}
 	
 	private DefaultCategoryDataset createDataset()

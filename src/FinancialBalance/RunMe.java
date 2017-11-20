@@ -20,6 +20,5 @@ public class RunMe {
 	public static void main(String [] args){
 		FinancialBalance fb = new FinancialBalance();
 		SwingUtilities.invokeLater(new AppFrameRunner(fb));
-		SwingUtilities.invokeLater(new PlotFrameRunner(fb.getMonthlyReports()));
 	}
 }

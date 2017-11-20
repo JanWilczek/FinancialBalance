@@ -6,6 +6,7 @@ import java.util.Map;
 import FinancialBalance.BarChartFrame;
 import FinancialBalance.MonthlyReport;
 import FinancialBalance.PlotFrame;
+import FinancialBalance.StatisticsFrame;
 
 public class PlotFrameRunner implements Runnable
 {
@@ -18,9 +19,12 @@ public class PlotFrameRunner implements Runnable
 	
 	@Override
 	public void run() {
+		/*
 		@SuppressWarnings("unused")
 		PlotFrame plotFrame = new PlotFrame(monthlyReports);
 		@SuppressWarnings("unused")
-		BarChartFrame barChartFrame = new BarChartFrame(monthlyReports);
+		BarChartFrame barChartFrame = new BarChartFrame(monthlyReports);*/
+		@SuppressWarnings("unused")
+		StatisticsFrame statisticsFrame = new StatisticsFrame(monthlyReports);
 	}
 }
