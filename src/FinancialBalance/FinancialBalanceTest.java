@@ -57,7 +57,7 @@ public class FinancialBalanceTest extends TestCase {
 		}
 		
 		@Test
-		public void testClearDatbase(){
+		public void testClearDatabase(){
 			Expense expenseToAdd = new Expense("test", ExpenseCategory.School, Calendar.getInstance(), new BigDecimal("43.25"));
 			financialBalance.addExpense(expenseToAdd);			
 			Expense expenseToAdd2 = new Expense("test2", ExpenseCategory.Other, Calendar.getInstance(), new BigDecimal("21.09"));

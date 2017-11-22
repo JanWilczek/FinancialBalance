@@ -30,7 +30,9 @@ public final class TextfileDataProvider implements DataProvider {
 	
 	@Override
 	public List<Expense> getExpenses() {
-		return openExpensesFile();
+		List<Expense> expenses = openExpensesFile();
+		if (expenses == null) expenses = new LinkedList<Expense>();	// TODO: Unhardcode LinkedList here. Is it elegant to store it this way?
+		return expenses;
 	}
 
 	@Override
@@ -109,7 +111,7 @@ public final class TextfileDataProvider implements DataProvider {
 	 * @param expensesStrings
 	 */
 	private List<Expense> readExpensesFromFile(List<String> expensesStrings) {
-		List<Expense> expenses = new LinkedList<Expense>();	// TODO: Unhardcode LinkedList here. What if it didn't match with financialBalance's class?
+		List<Expense> expenses = new LinkedList<Expense>();	
 		String[] expenseString = new String[4];
 		for (String s : expensesStrings) {
 			Expense expense = new Expense();
