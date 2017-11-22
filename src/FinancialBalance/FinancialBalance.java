@@ -39,13 +39,16 @@ public class FinancialBalance {
 	private List<Expense> expenses;
 	private Map<YearMonth, MonthlyReport> monthlyReports;
 	private DataProvider dataProvider;
+	private String name;
 
 	
 	private boolean databaseUpdateScheduled = false; ///< a flag informing whether database needs an update 
 	
-	FinancialBalance()
+	FinancialBalance(String name)
 	{
-		dataProvider = new TextfileDataProvider();
+		this.name = name;
+		
+		dataProvider = new TextfileDataProvider(this.name + ".txt");
 		expenses = dataProvider.getExpenses();
 		
 		Collections.sort(expenses);

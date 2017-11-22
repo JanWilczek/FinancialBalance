@@ -18,7 +18,7 @@ import javax.swing.SwingUtilities;
  */
 public class RunMe {
 	public static void main(String [] args){
-		FinancialBalance fb = new FinancialBalance();
+		FinancialBalance fb = new FinancialBalance("expenses");
 		SwingUtilities.invokeLater(new AppFrameRunner(fb));
 	}
 }

@@ -52,7 +52,7 @@ public class StatisticsFrame extends JFrame{
 		for (int i = 0 ; i < categories.length; i++){
 			categoriesTotals[i] = new JCheckBox(categories[i].toString());
 			categoriesPanel.add(categoriesTotals[i]);
-		}
+		}		
 		
 		totalsHistoryPanel.add(categoriesPanel);
 		totalsHistoryPanel.add(StatisticsChartPanelFactory.createLinePlotPanel(monthlyReports));
