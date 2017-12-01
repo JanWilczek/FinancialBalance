@@ -1,5 +1,6 @@
 package FinancialBalance;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -28,6 +29,7 @@ import org.jfree.chart.ChartPanel;
  * @version 1.0
  *
  * A class responsible for displaying expenses' statistics in a separate window.
+ * Each of the tabbed panels uses BorderLayout to display chart options on top and the chart itself at the center.
  * 
  */
 public class StatisticsFrame extends JFrame{
@@ -58,9 +60,8 @@ public class StatisticsFrame extends JFrame{
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.setSize(baseWidth, baseHeight);
 		
-		// TODO: Implement GridBagLayout in each of the panels
-		
 		totalsHistoryPanel = new JPanel();
+		totalsHistoryPanel.setLayout(new BorderLayout());
 		
 		categoriesPanel = new JPanel();
 		
@@ -74,20 +75,20 @@ public class StatisticsFrame extends JFrame{
 			categoriesTotalsCheckBoxes[i] = new JCheckBox(categories[i].toString());
 			categoriesTotalsCheckBoxes[i].addChangeListener(checkBoxListener);
 			categoriesPanel.add(categoriesTotalsCheckBoxes[i]);
-			//totalsHistoryPanel.add(categoriesTotals[i]);	// The result is the same as of the line above
 		}
 		
-		totalsHistoryPanel.add(categoriesPanel);
-		updatePlotChart();
+		totalsHistoryPanel.add(categoriesPanel, BorderLayout.NORTH);
+		updateLinePlot();
 		
 		expensesPerCategoryPanel = new JPanel();
+		expensesPerCategoryPanel.setLayout(new BorderLayout());
 		
 		List<YearMonth> monthsToDisplay = new LinkedList<>(monthlyReports.keySet());
 		Collections.reverse(monthsToDisplay);
 		monthCombo = new JComboBox<YearMonth>(monthsToDisplay.toArray(new YearMonth[monthsToDisplay.size()]));
 		monthCombo.addActionListener(comboBoxListener);
 		
-		expensesPerCategoryPanel.add(monthCombo);
+		expensesPerCategoryPanel.add(monthCombo, BorderLayout.NORTH);
 		updateBarChart();
 		
 		tabbedPane = new JTabbedPane();
@@ -102,7 +103,10 @@ public class StatisticsFrame extends JFrame{
 		this.setVisible(true);
 	}
 	
-	private void updatePlotChart()
+	/**
+	 * Updates the line plot with currently checked boxes.
+	 */
+	private void updateLinePlot()
 	{
 		if (plotChartPanel != null) totalsHistoryPanel.remove(plotChartPanel);
 		List<ExpenseCategory> displayedCategories = new LinkedList<>();
@@ -114,16 +118,19 @@ public class StatisticsFrame extends JFrame{
 				totalsCheckBox.isSelected(),
 				displayedCategories.toArray(new ExpenseCategory[displayedCategories.size()])
 				);
-		totalsHistoryPanel.add(plotChartPanel);
+		totalsHistoryPanel.add(plotChartPanel, BorderLayout.CENTER);
 		totalsHistoryPanel.validate();
 	}
 	
+	/**
+	 * Updates the bar chart displaying statistics for currently selected month.
+	 */
 	private void updateBarChart()
 	{
 		if (monthCombo.getItemCount() > 0) {
 			if (barChartPanel != null) expensesPerCategoryPanel.remove(barChartPanel);
 			barChartPanel = StatisticsChartPanelFactory.createBarChartPanel(monthlyReports, (YearMonth) monthCombo.getSelectedItem());
-			expensesPerCategoryPanel.add(barChartPanel);
+			expensesPerCategoryPanel.add(barChartPanel, BorderLayout.CENTER);
 			if (this.isVisible()) expensesPerCategoryPanel.validate();
 		}
 	}
@@ -139,7 +146,7 @@ public class StatisticsFrame extends JFrame{
 
 		@Override
 		public void stateChanged(ChangeEvent ce) {
-			updatePlotChart();
+			updateLinePlot();
 		}	
 	};
 	
