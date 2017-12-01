@@ -53,7 +53,7 @@ public class FinancialBalance {
 		
 		Collections.sort(expenses);
 		
-		monthlyReports = new TreeMap<>(new ReverseDateComparator());
+		monthlyReports = new TreeMap<>();
 		generateMonthlyReports();
 	}
 	

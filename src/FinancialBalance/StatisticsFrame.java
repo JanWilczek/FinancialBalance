@@ -2,7 +2,11 @@ package FinancialBalance;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.time.YearMonth;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JCheckBox;
@@ -11,6 +15,10 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.WindowConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import org.jfree.chart.ChartPanel;
 
 /**
  * @author Jan F. Wilczek
@@ -25,51 +33,59 @@ public class StatisticsFrame extends JFrame{
 	private static final long serialVersionUID = 4893816996478741925L;
 	private int baseWidth = 650;
 	private int baseHeight = 550;
-	private JTabbedPane tabbedPane;
-	private JCheckBox totals;
-	private JCheckBox[] categoriesTotals;
+	private JCheckBox totalsCheckBox;
+	private JCheckBox[] categoriesTotalsCheckBoxes;
 	private JComboBox<YearMonth> monthCombo;
+	
+	private JTabbedPane tabbedPane;
+	private JPanel totalsHistoryPanel;
+	private JPanel categoriesPanel;
+	private ChartPanel plotChartPanel;
+	private JPanel expensesPerCategoryPanel;
+	private ChartPanel barChartPanel;
+	
+	private Map<YearMonth, MonthlyReport> monthlyReports;
 	
 	/**
 	 * Public constructor.
 	 * @param monthlyReports
 	 */
 	public StatisticsFrame(Map<YearMonth, MonthlyReport> monthlyReports) {
+		this.monthlyReports = monthlyReports;
+		
 		this.setTitle("Expense Statistics");
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.setSize(baseWidth, baseHeight);
 		
 		// TODO: Implement GridBagLayout in each of the panels
 		
-		JPanel totalsHistoryPanel = new JPanel();
+		totalsHistoryPanel = new JPanel();
 		
-		JPanel categoriesPanel = new JPanel();
+		categoriesPanel = new JPanel();
 		
-		totals = new JCheckBox("Totals", true);
-		categoriesPanel.add(totals);
+		totalsCheckBox = new JCheckBox("Totals", true);
+		totalsCheckBox.addChangeListener(checkBoxListener);
+		categoriesPanel.add(totalsCheckBox);
+		
 		ExpenseCategory[] categories = ExpenseCategory.values();
-		categoriesTotals = new JCheckBox[categories.length];
+		categoriesTotalsCheckBoxes = new JCheckBox[categories.length];
 		for (int i = 0 ; i < categories.length; i++){
-			categoriesTotals[i] = new JCheckBox(categories[i].toString());
-			categoriesPanel.add(categoriesTotals[i]);
-		}		
+			categoriesTotalsCheckBoxes[i] = new JCheckBox(categories[i].toString());
+			categoriesTotalsCheckBoxes[i].addChangeListener(checkBoxListener);
+			categoriesPanel.add(categoriesTotalsCheckBoxes[i]);
+			//totalsHistoryPanel.add(categoriesTotals[i]);	// The result is the same as of the line above
+		}
 		
 		totalsHistoryPanel.add(categoriesPanel);
-		totalsHistoryPanel.add(StatisticsChartPanelFactory.createLinePlotPanel(monthlyReports));
+		updatePlotChart();
 		
-		JPanel expensesPerCategoryPanel = new JPanel();
+		expensesPerCategoryPanel = new JPanel();
 		
-		YearMonth[] monthsInReports = new YearMonth[monthlyReports.keySet().size()];
-		int i = 0;
-		for (YearMonth month : monthlyReports.keySet())
-		{
-			monthsInReports[i] = month;
-			i++;
-		}
-		monthCombo = new JComboBox<YearMonth>(monthsInReports);
+		monthCombo = new JComboBox<YearMonth>(monthlyReports.keySet().toArray(new YearMonth[monthlyReports.keySet().size()]));
+		monthCombo.addActionListener(comboBoxListener);
 		
 		expensesPerCategoryPanel.add(monthCombo);
-		expensesPerCategoryPanel.add(StatisticsChartPanelFactory.createBarChartPanel(monthlyReports, YearMonth.now()));
+		updateBarChart();
 		
 		tabbedPane = new JTabbedPane();
 		tabbedPane.add("Totals history", totalsHistoryPanel);
@@ -82,5 +98,47 @@ public class StatisticsFrame extends JFrame{
 		this.setLocation(dim.width / 3 - baseWidth / 2, dim.height / 3 - baseHeight / 2);
 		this.setVisible(true);
 	}
+	
+	private void updatePlotChart()
+	{
+		if (plotChartPanel != null) totalsHistoryPanel.remove(plotChartPanel);
+		List<ExpenseCategory> displayedCategories = new LinkedList<>();
+		for (JCheckBox categoryCheckBox : categoriesTotalsCheckBoxes)
+			if (categoryCheckBox.isSelected())
+				displayedCategories.add(ExpenseCategory.valueOf(categoryCheckBox.getText()));
+		plotChartPanel = StatisticsChartPanelFactory.createLinePlotPanel(
+				monthlyReports, 
+				totalsCheckBox.isSelected(),
+				displayedCategories.toArray(new ExpenseCategory[displayedCategories.size()])
+				);
+		totalsHistoryPanel.add(plotChartPanel);
+		totalsHistoryPanel.validate();
+	}
+	
+	private void updateBarChart()
+	{
+		if (monthCombo.getItemCount() > 0) {
+			if (barChartPanel != null) expensesPerCategoryPanel.remove(barChartPanel);
+			barChartPanel = StatisticsChartPanelFactory.createBarChartPanel(monthlyReports, (YearMonth) monthCombo.getSelectedItem());
+			expensesPerCategoryPanel.add(barChartPanel);
+			if (this.isVisible()) expensesPerCategoryPanel.validate();
+		}
+	}
+	
+	private ActionListener comboBoxListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent ae) {
+			if (ae.getSource().equals(monthCombo)) updateBarChart();
+		}
+	};
+	
+	private ChangeListener checkBoxListener = new ChangeListener() {
 
+		@Override
+		public void stateChanged(ChangeEvent ce) {
+			updatePlotChart();
+		}	
+	};
+	
+	
 }
