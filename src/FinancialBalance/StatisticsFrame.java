@@ -5,6 +5,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.YearMonth;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +82,9 @@ public class StatisticsFrame extends JFrame{
 		
 		expensesPerCategoryPanel = new JPanel();
 		
-		monthCombo = new JComboBox<YearMonth>(monthlyReports.keySet().toArray(new YearMonth[monthlyReports.keySet().size()]));
+		List<YearMonth> monthsToDisplay = new LinkedList<>(monthlyReports.keySet());
+		Collections.reverse(monthsToDisplay);
+		monthCombo = new JComboBox<YearMonth>(monthsToDisplay.toArray(new YearMonth[monthsToDisplay.size()]));
 		monthCombo.addActionListener(comboBoxListener);
 		
 		expensesPerCategoryPanel.add(monthCombo);

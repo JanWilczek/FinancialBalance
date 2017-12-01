@@ -21,7 +21,9 @@ import java.text.SimpleDateFormat;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -129,7 +131,9 @@ public class AppFrame extends JFrame {
 	private void generateReportsTable() {
 		Object [][] reportsData = new Object [financialBalance.getMonthlyReports().size()][2];
 		int dataIndex = 0;
-		for (Map.Entry<YearMonth, MonthlyReport> monthlyReport : financialBalance.getMonthlyReports().entrySet())
+		List<Map.Entry<YearMonth, MonthlyReport>> monthlyReports = new LinkedList<>(financialBalance.getMonthlyReports().entrySet());
+		Collections.reverse(monthlyReports);
+		for (Map.Entry<YearMonth, MonthlyReport> monthlyReport : monthlyReports)
 		{
 			reportsData[dataIndex][0] = monthlyReport.getKey().format(DateTimeFormatter.ofPattern("yyyy-MM"));
 			reportsData[dataIndex][1] = monthlyReport.getValue().getTotal();
@@ -150,7 +154,6 @@ public class AppFrame extends JFrame {
 	 * Generate the expenses table.
 	 */
 	private void generateExpensesTable() {
-		//if (tableScrollPane != null) mainPanel.remove(tableScrollPane);
 		//Set the table data
 		//Get column names from Expense fields as a String array
 		String[] columnNames = null;

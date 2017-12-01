@@ -22,7 +22,6 @@ import java.util.TreeSet;
 import java.util.Set;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.time.YearMonth;
 
 /**
@@ -162,18 +161,6 @@ public class FinancialBalance {
 		for (YearMonth month : monthSet)
 		{
 			monthlyReports.put(month, new MonthlyReport(month, expenses));
-		}
-	}
-	
-	// helper comparator class
-	// The months are sorted in descending order for GUI purposes.
-	private class ReverseDateComparator implements Comparator<YearMonth>
-	{
-		@Override
-		public int compare(YearMonth month1, YearMonth month2) {
-			if (month1.getYear() > month2.getYear()) return -1;
-			else if (month1.getYear() < month2.getYear()) return 1;
-			else return -month1.compareTo(month2);
 		}
 	}
 }
