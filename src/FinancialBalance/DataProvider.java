@@ -39,6 +39,9 @@ public interface DataProvider {
 	 */
 	public boolean deleteExpense(int indexExpenseToDelete);
 	
+	//	TODO: To implement.
+	//public void updateExpense(Expense expenseToUpdate, Expense expenseUpdated);
+	
 	/**
 	 *  Updates the database with current FinancialBalance state.
 	 */

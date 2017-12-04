@@ -1,12 +1,14 @@
 package FinancialBalance;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -43,26 +45,46 @@ public class SQLiteDatabaseDataProvider implements DataProvider {
 					Expense expense = new Expense();
 					expense.setName(expensesSet.getString(ExpenseDatabaseEntry.COLUMN_NAME));
 					expense.setCategory(ExpenseCategory.valueOf(expensesSet.getString(ExpenseDatabaseEntry.COLUMN_CATEGORY)));
-					try {
-						Calendar date = Calendar.getInstance();
-						date.setTime(new Date(Long.parseLong(expensesSet.getString(ExpenseDatabaseEntry.COLUMN_DATE))));
-						expense.setDate(date);
-					} catch (NumberFormatException nfe) {
-						System.err.println(nfe.getMessage());
-					}
+					Calendar date = Calendar.getInstance();
+					date.setTime(new Date(expensesSet.getLong(ExpenseDatabaseEntry.COLUMN_DATE)));
+					expense.setDate(date);
 					expense.setPrice(new BigDecimal(expensesSet.getString(ExpenseDatabaseEntry.COLUMN_PRICE)));
+					
+					expensesInDatabase.add(expense);
 				}
 			} catch (SQLException se) {
 				System.err.println(se.getMessage());
 			}
 		}
+
 		return expensesInDatabase;
 	}
 
 	@Override
 	public void addExpense(Expense expenseToAdd) {
-		// TODO Auto-generated method stub
-
+		int insertedRows = 0;
+		
+		final String insertExpenseCommand = "INSERT INTO "+ ExpenseDatabaseEntry.TABLE_NAME + "("
+				+ ExpenseDatabaseEntry.COLUMN_NAME + ","
+				+ ExpenseDatabaseEntry.COLUMN_CATEGORY + ","
+				+ ExpenseDatabaseEntry.COLUMN_DATE + ","
+				+ ExpenseDatabaseEntry.COLUMN_PRICE + ")"
+				+ " VALUES(?,?,?,?);";
+		if (connection != null)
+		{
+			try {
+				PreparedStatement insertExpenseStatement = connection.prepareStatement(insertExpenseCommand);
+				insertExpenseStatement.setString(1, expenseToAdd.getName());
+				insertExpenseStatement.setString(2, expenseToAdd.getCategory().toString());
+				insertExpenseStatement.setLong(3, expenseToAdd.getDate().getTime().getTime());
+				insertExpenseStatement.setString(4, expenseToAdd.getPrice().toString());
+				insertedRows = insertExpenseStatement.executeUpdate();
+			} catch (SQLException se) {
+				System.err.println(se.getMessage());
+			}
+		}
+		
+		//return insertedRows;	// TODO: Uncomment when the interface is coherent.
 	}
 
 	@Override
@@ -85,7 +107,7 @@ public class SQLiteDatabaseDataProvider implements DataProvider {
 
 	@Override
 	public void clearDatabase() {
-		// TODO Auto-generated method stub
+		
 
 	}
 
