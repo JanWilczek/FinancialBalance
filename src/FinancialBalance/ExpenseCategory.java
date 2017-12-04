@@ -1,6 +1,6 @@
 package FinancialBalance;
 
-enum ExpenseCategory {
+public enum ExpenseCategory {
 	Other(0), 	// Categories are sorted by popularity apart from "Other" which should be always shown as first.
 	Food(1),
 	Meals(2),

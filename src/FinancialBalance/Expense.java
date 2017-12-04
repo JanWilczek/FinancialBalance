@@ -8,7 +8,7 @@ import java.lang.Comparable;
  * A class representing an expense.
  * @author Jan Wilczek
  */
-class Expense implements Comparable<Expense> {
+public class Expense implements Comparable<Expense> {
 	private String name;
 	private ExpenseCategory category;
 	private Calendar date;
@@ -16,7 +16,7 @@ class Expense implements Comparable<Expense> {
 	
 	
 	// Constructors
-	Expense(String name, ExpenseCategory category, Calendar date, BigDecimal price)	//TODO: Change Date to Calendar or an other class
+	public Expense(String name, ExpenseCategory category, Calendar date, BigDecimal price)	//TODO: Change Date to Calendar or an other class
 	{
 		this.name = name;
 		this.category = category;
@@ -24,7 +24,7 @@ class Expense implements Comparable<Expense> {
 		this.price = price;
 	}
 	
-	Expense(String name, Calendar date, BigDecimal price)
+	public Expense(String name, Calendar date, BigDecimal price)
 	{
 		this.name = name;
 		this.category = ExpenseCategory.Other;
@@ -32,7 +32,7 @@ class Expense implements Comparable<Expense> {
 		this.price = price;
 	}
 	
-	Expense()
+	public Expense()
 	{
 		this.name = "";
 		this.category = ExpenseCategory.Other;

@@ -43,7 +43,7 @@ public class FinancialBalance {
 	
 	private boolean databaseUpdateScheduled = false; ///< a flag informing whether database needs an update 
 	
-	FinancialBalance(String name)
+	public FinancialBalance(String name)
 	{
 		this.name = name;
 		

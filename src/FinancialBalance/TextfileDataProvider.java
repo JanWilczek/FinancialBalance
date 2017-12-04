@@ -119,7 +119,6 @@ public final class TextfileDataProvider implements DataProvider {
 			expense.setName(expenseString[0]);
 			expense.setCategory(ExpenseCategory.valueOf(expenseString[1]));
 			try {
-				//expense.setDate(DateFormat.getDateInstance().parse(expenseString[2]));
 				Calendar date = Calendar.getInstance();
 				date.setTime(new Date(Long.parseLong(expenseString[2])));
 				expense.setDate(date);
@@ -130,6 +129,30 @@ public final class TextfileDataProvider implements DataProvider {
 			expenses.add(expense);
 		}
 		return expenses;
+	}
+
+	@Override
+	public void addExpense(Expense expenseToAdd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean deleteExpense(Expense expenseToDelete) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean deleteExpense(int indexExpenseToDelete) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void onClose() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
