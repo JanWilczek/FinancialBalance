@@ -89,14 +89,36 @@ public class SQLiteDatabaseDataProvider implements DataProvider {
 
 	@Override
 	public boolean deleteExpense(Expense expenseToDelete) {
-		// TODO Auto-generated method stub
-		return false;
+		final String deleteExpenseCommand = "DELETE FROM " + ExpenseDatabaseEntry.TABLE_NAME + " WHERE "
+				+ ExpenseDatabaseEntry.COLUMN_NAME + " = " + expenseToDelete.getName() + " AND "
+				+ ExpenseDatabaseEntry.COLUMN_CATEGORY + " = " + expenseToDelete.getCategory().toString() + " AND "
+				+ ExpenseDatabaseEntry.COLUMN_DATE + " = " + expenseToDelete.getDate().getTime().getTime() + " AND "
+				+ ExpenseDatabaseEntry.COLUMN_PRICE + " = " + expenseToDelete.getPrice().toString() + ";";
+		
+		
+		try {
+			Statement deleteExpenseStatement = connection.createStatement();
+			deleteExpenseStatement.execute(deleteExpenseCommand);
+			return true;
+		} catch (SQLException se) {
+			System.err.println(se.getMessage());
+			return false;
+		}
 	}
 
 	@Override
 	public boolean deleteExpense(int indexExpenseToDelete) {
-		// TODO Auto-generated method stub
-		return false;
+		final String deleteExpenseCommand = "DELETE FROM " + ExpenseDatabaseEntry.TABLE_NAME + " WHERE "
+				+ ExpenseDatabaseEntry._ID + " = " + indexExpenseToDelete + ";";
+		
+		try {
+			Statement deleteExpenseStatement = connection.createStatement();
+			deleteExpenseStatement.execute(deleteExpenseCommand);
+			return true;
+		} catch (SQLException se) {
+			System.err.println(se.getMessage());
+			return false;
+		}
 	}
 
 	@Override
@@ -107,8 +129,14 @@ public class SQLiteDatabaseDataProvider implements DataProvider {
 
 	@Override
 	public void clearDatabase() {
+		final String clearDatabaseCommand = "DROP TABLE IF EXISTS " + ExpenseDatabaseEntry.TABLE_NAME + ";";
 		
-
+		try {
+			Statement deleteExpenseStatement = connection.createStatement();
+			deleteExpenseStatement.execute(clearDatabaseCommand);
+		} catch (SQLException se) {
+			System.err.println(se.getMessage());
+		}
 	}
 
 	@Override
