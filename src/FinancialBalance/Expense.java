@@ -61,12 +61,12 @@ public class Expense implements Comparable<Expense> {
 	@Override
 	public String toString()
 	{
-		return getName() + " " + getCategory() + " " + getDate() + " " + getPrice() + System.lineSeparator();
+		return getName() + " " + getCategory() + " " + getDate() + " " + getPrice();
 	}
 	
 	public String toDatabaseString()
 	{
-		return getName() + "/" + getCategory() + "/" + getDate().getTime().getTime() + "/" + getPrice() + System.lineSeparator();
+		return getName() + "/" + getCategory() + "/" + getDate().getTime().getTime() + "/" + getPrice();
 	}
 	
 	// Getters

@@ -226,9 +226,10 @@ public class AppFrame extends JFrame {
 		public void actionPerformed(ActionEvent ae) {
 			if (ae.getSource().equals(addButton)) {
 				// Check for date correctness
+				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 				Calendar expenseDate = Calendar.getInstance();
 				try {
-					expenseDate.setTime((Date) dateField.getValue());
+					expenseDate.setTime(simpleDateFormat.parse(simpleDateFormat.format((Date) dateField.getValue())));
 				} catch (Exception e) {
 					JOptionPane.showMessageDialog(AppFrame.this, "Incorrect date format!", "Error",
 							JOptionPane.ERROR_MESSAGE);
@@ -246,7 +247,6 @@ public class AppFrame extends JFrame {
 				Expense expenseToAdd = new Expense(nameField.getText(),
 						(ExpenseCategory) categoryCombo.getSelectedItem(), expenseDate, expensePrice);
 				int index = financialBalance.addExpense(expenseToAdd);	// Add the expense to the main logic object.
-				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 				DefaultTableModel model = (DefaultTableModel) expensesTable.getModel();
 
 				model.insertRow(index, new Object[] {expenseToAdd.getName(), expenseToAdd.getCategory(), simpleDateFormat.format(expenseToAdd.getDate().getTime()), expenseToAdd.getPrice()});
@@ -352,7 +352,7 @@ public class AppFrame extends JFrame {
 
 		@Override
 		public void windowClosing(WindowEvent e) {
-			financialBalance.updateDatabase();			
+			financialBalance.close();			
 		}
 
 		@Override

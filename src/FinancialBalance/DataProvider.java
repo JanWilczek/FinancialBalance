@@ -23,7 +23,7 @@ public interface DataProvider {
 	 * Adds and expense to the database.
 	 * @param expenseToAdd
 	 */
-	public void addExpense(Expense expenseToAdd);
+	public boolean addExpense(Expense expenseToAdd);
 	
 	/**
 	 * Deletes the given expense.
@@ -32,20 +32,8 @@ public interface DataProvider {
 	 */
 	public boolean deleteExpense(Expense expenseToDelete);
 	
-	/**
-	 * Deletes expense at the given index
-	 * @param indexExpenseToDelete
-	 * @return true if the expense has been deleted
-	 */
-	public boolean deleteExpense(int indexExpenseToDelete);
-	
 	//	TODO: To implement.
 	//public void updateExpense(Expense expenseToUpdate, Expense expenseUpdated);
-	
-	/**
-	 *  Updates the database with current FinancialBalance state.
-	 */
-	public void updateDatabase(List<Expense> expenses);
 	
 	/**
 	 * Clears the internal database. Use with care.
@@ -55,5 +43,11 @@ public interface DataProvider {
 	/**
 	 * Performs closing action.
 	 */
-	public void onClose();
+	public void close();
+	
+	/**
+	 * Overrides the existing database with the given expenses.
+	 * @param expenses
+	 */
+	public void updateDatabase(List<Expense> expenses);
 }

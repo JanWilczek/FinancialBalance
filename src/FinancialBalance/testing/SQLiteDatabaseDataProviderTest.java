@@ -25,7 +25,7 @@ public class SQLiteDatabaseDataProviderTest extends TestCase {
 	}
 	
 	protected void tearDown(){
-		sqliteDatabaseDataProvider.onClose();
+		sqliteDatabaseDataProvider.close();
 		try {
 			Files.deleteIfExists(Paths.get(sqliteDatabaseDataProvider.getDatabaseFileName()));
 		} catch (IOException ioe) {

@@ -1,7 +1,6 @@
 package FinancialBalance;
 
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,7 +60,7 @@ public class SQLiteDatabaseDataProvider implements DataProvider {
 	}
 
 	@Override
-	public void addExpense(Expense expenseToAdd) {
+	public boolean addExpense(Expense expenseToAdd) {
 		int insertedRows = 0;
 		
 		final String insertExpenseCommand = "INSERT INTO "+ ExpenseDatabaseEntry.TABLE_NAME + "("
@@ -84,7 +83,7 @@ public class SQLiteDatabaseDataProvider implements DataProvider {
 			}
 		}
 		
-		//return insertedRows;	// TODO: Uncomment when the interface is coherent.
+		return insertedRows > 0;
 	}
 
 	@Override
@@ -107,27 +106,6 @@ public class SQLiteDatabaseDataProvider implements DataProvider {
 	}
 
 	@Override
-	public boolean deleteExpense(int indexExpenseToDelete) {
-		final String deleteExpenseCommand = "DELETE FROM " + ExpenseDatabaseEntry.TABLE_NAME + " WHERE "
-				+ ExpenseDatabaseEntry._ID + " = " + indexExpenseToDelete + ";";
-		
-		try {
-			Statement deleteExpenseStatement = connection.createStatement();
-			deleteExpenseStatement.execute(deleteExpenseCommand);
-			return true;
-		} catch (SQLException se) {
-			System.err.println(se.getMessage());
-			return false;
-		}
-	}
-
-	@Override
-	public void updateDatabase(List<Expense> expenses) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void clearDatabase() {
 		final String clearDatabaseCommand = "DROP TABLE IF EXISTS " + ExpenseDatabaseEntry.TABLE_NAME + ";";
 		
@@ -138,9 +116,19 @@ public class SQLiteDatabaseDataProvider implements DataProvider {
 			System.err.println(se.getMessage());
 		}
 	}
+	
+	@Override
+	public void updateDatabase(List<Expense> expenses) {
+		clearDatabase();
+		createTable();
+		for (Expense expense : expenses)
+		{
+			addExpense(expense);
+		}
+	}
 
 	@Override
-	public void onClose() {
+	public void close() {
 		disconnect();
 	}
 	
@@ -187,6 +175,11 @@ public class SQLiteDatabaseDataProvider implements DataProvider {
 		}
 	}
 	
+	/**
+	 * 
+	 * @author Jan F. Wilczek
+	 * A static class holding the data necessary for database communication.
+	 */
 	public static final class ExpenseDatabaseEntry
 	{
 		public static final String TABLE_NAME = "expenses";

@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
 public final class TextfileDataProvider implements DataProvider {
 	private String expensesFilePath;
 	private Path expensesFile;
-	private final static Charset charset = Charset.forName("ISO-8859-1");
+	private final static Charset charset = Charset.forName("ISO-8859-2");
 	
 	public TextfileDataProvider()
 	{
@@ -34,23 +35,6 @@ public final class TextfileDataProvider implements DataProvider {
 		if (expenses == null) expenses = new LinkedList<Expense>();	// TODO: Unhardcode LinkedList here. Is it elegant to store it this way?
 		return expenses;
 	}
-
-	@Override
-	public void updateDatabase(List<Expense> expenses) {
-		try {
-			Files.deleteIfExists(expensesFile);
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
-		for (Expense expense : expenses) {
-			try {
-				Files.write(expensesFile, expense.toDatabaseString().getBytes(charset), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-			} catch (IOException ioe) {
-				ioe.printStackTrace();
-			} 
-		}
-
-	}
 	
 	@Override
 	public void clearDatabase() {
@@ -59,6 +43,62 @@ public final class TextfileDataProvider implements DataProvider {
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}	
+	}
+	
+	@Override
+	public void updateDatabase(List<Expense> expenses) {
+			try {
+				Files.deleteIfExists(expensesFile);
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
+			for (Expense expense : expenses) {
+				try {
+					Files.write(expensesFile, (expense.toDatabaseString() + System.lineSeparator()).getBytes(charset), StandardOpenOption.CREATE,
+							StandardOpenOption.APPEND);
+				} catch (IOException ioe) {
+					ioe.printStackTrace();
+				}
+			} 
+	}
+	
+	@Override
+	public boolean addExpense(Expense expenseToAdd) {
+		try {
+			Files.write(expensesFile, (expenseToAdd.toDatabaseString() + System.lineSeparator()).getBytes(charset), StandardOpenOption.CREATE,
+					StandardOpenOption.APPEND);
+			return true;
+		} catch (IOException ioe) {
+			System.err.println(ioe.getMessage());
+			return false;
+		}
+	}
+	
+	@Override
+	public boolean deleteExpense(Expense expenseToDelete) {
+		if (Files.exists(expensesFile))
+		{
+			try {
+				List<String> expensesStrings = Files.readAllLines(expensesFile, charset);
+				String stringToDelete = expenseToDelete.toDatabaseString();
+				if (expensesStrings.remove(stringToDelete))	// BUG!!!
+				{
+					Files.delete(expensesFile);
+					Files.write(expensesFile, expensesStrings, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+					return true;
+				}
+			} catch (IOException ioe) {
+				System.err.println(ioe.getMessage());
+			} 
+		}
+		return false;
+	}
+	
+	@Override
+	public void close() {
+		List<Expense> expenses = getExpenses();
+		Collections.sort(expenses);
+		updateDatabase(expenses);
 	}
 	
 	/**
@@ -104,7 +144,6 @@ public final class TextfileDataProvider implements DataProvider {
 		}
 		return null;
 	}
-	
 
 	/**
 	 * Reads database content from a list of lines (strings) to the internal container.
@@ -129,30 +168,6 @@ public final class TextfileDataProvider implements DataProvider {
 			expenses.add(expense);
 		}
 		return expenses;
-	}
-
-	@Override
-	public void addExpense(Expense expenseToAdd) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean deleteExpense(Expense expenseToDelete) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean deleteExpense(int indexExpenseToDelete) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void onClose() {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

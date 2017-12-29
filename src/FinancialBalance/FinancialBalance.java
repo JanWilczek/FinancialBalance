@@ -38,10 +38,7 @@ public class FinancialBalance {
 	private List<Expense> expenses;
 	private Map<YearMonth, MonthlyReport> monthlyReports;
 	private DataProvider dataProvider;
-	private String name;
-
-	
-	private boolean databaseUpdateScheduled = false; ///< a flag informing whether database needs an update 
+	private String name;	
 	
 	public FinancialBalance(String name)
 	{
@@ -66,11 +63,13 @@ public class FinancialBalance {
 	 */
 	public int addExpense(Expense expenseToAdd)
 	{
-		expenses.add(expenseToAdd);
-		Collections.sort(expenses);		// TODO: [RESEARCH] Is there a better way to do it than sorting all elements? Is sorting them costly?
-		generateMonthlyReports();
-		databaseUpdateScheduled = true;
-		return expenses.indexOf(expenseToAdd);
+		if (dataProvider.addExpense(expenseToAdd)) {
+			expenses.add(expenseToAdd);
+			Collections.sort(expenses); // TODO: [RESEARCH] Is there a better way to do it than sorting all elements? Is sorting them costly?
+			generateMonthlyReports();
+			return expenses.indexOf(expenseToAdd);
+		}
+		return -1;
 	}
 	
 	/**
@@ -81,14 +80,12 @@ public class FinancialBalance {
 	 */
 	public boolean deleteExpense(Expense expenseToDelete)
 	{
-		for (Expense expense : expenses)
-			if (expense.equals(expenseToDelete))
-			{
-				expenses.remove(expense);
-				generateMonthlyReports();
-				databaseUpdateScheduled = true;
-				return true;
-			}
+		if (dataProvider.deleteExpense(expenseToDelete))
+		{
+			expenses.remove(expenseToDelete);
+			generateMonthlyReports();
+			return true;			
+		}
 		return false;
 	}
 	
@@ -100,25 +97,15 @@ public class FinancialBalance {
 	 */
 	public boolean deleteExpense(int expenseToDeleteIndex)
 	{
-		if (expenseToDeleteIndex > 0 && expenseToDeleteIndex < expenses.size())
+		if (dataProvider.deleteExpense(expenses.get(expenseToDeleteIndex)))
 		{
 				expenses.remove(expenseToDeleteIndex);
 				generateMonthlyReports();
-				databaseUpdateScheduled = true;
 				return true;
 		}
 		return false;
 	}
 	
-	/**
-	 * Updates the database file objects when databaseUpdateScheduled flag is true.
-	 */
-	public void updateDatabase()
-	{
-		if (databaseUpdateScheduled) {
-			dataProvider.updateDatabase(expenses);
-		}
-	}
 	
 	/**
 	 * @return expenses
@@ -145,6 +132,15 @@ public class FinancialBalance {
 	{
 		expenses.clear();
 		dataProvider.clearDatabase();
+	}
+	
+	/**
+	 * Perform all necessary closing actions.
+	 * Should be invoked before application's termination, otherwise data may be lost.
+	 */
+	public void close()
+	{
+		dataProvider.close();
 	}
 	
 	/**
