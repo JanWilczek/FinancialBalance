@@ -44,7 +44,7 @@ public class FinancialBalance {
 	{
 		this.name = name;
 		
-		dataProvider = new TextfileDataProvider(this.name + ".txt");
+		dataProvider = new SQLiteDatabaseDataProvider(this.name + ".db");
 		expenses = dataProvider.getExpenses();
 		
 		Collections.sort(expenses);
@@ -141,6 +141,14 @@ public class FinancialBalance {
 	public void close()
 	{
 		dataProvider.close();
+	}
+	
+	/**
+	 * @return name of the file database is stored in
+	 */
+	public String getDatabaseFileName()
+	{
+		return dataProvider.getDatabaseFileName();
 	}
 	
 	/**

@@ -15,6 +15,7 @@ import java.sql.Statement;
 public class SQLiteDatabaseDataProvider implements DataProvider {
 	
 	private String databaseFileName;
+	private String databaseTableName;
 	private final String urlPrefix = "jdbc:sqlite:";
 	private String url;
 	
@@ -22,8 +23,17 @@ public class SQLiteDatabaseDataProvider implements DataProvider {
 	
 	public SQLiteDatabaseDataProvider(String databaseFileName)
 	{
-		if (!databaseFileName.endsWith(".db")) databaseFileName += ".db";
-		this.databaseFileName = databaseFileName;
+		if (databaseFileName.endsWith(".db"))
+		{
+			this.databaseFileName = databaseFileName;
+			this.databaseTableName = databaseFileName.substring(0, databaseFileName.length()-3);
+		}
+		else
+		{
+			databaseTableName = databaseFileName;
+			this.databaseFileName = databaseFileName + ".db";
+		}
+		
 		this.url = this.urlPrefix + this.databaseFileName;
 		connect();
 		createTable();
@@ -33,7 +43,7 @@ public class SQLiteDatabaseDataProvider implements DataProvider {
 	public List<Expense> getExpenses() {
 		List<Expense> expensesInDatabase = new LinkedList<Expense>();
 		
-		final String selectAllQuery = "SELECT * FROM " + ExpenseDatabaseEntry.TABLE_NAME + ";";
+		final String selectAllQuery = "SELECT * FROM " + this.databaseTableName + ";";
 		if (connection != null)
 		{
 			try {
@@ -63,7 +73,7 @@ public class SQLiteDatabaseDataProvider implements DataProvider {
 	public boolean addExpense(Expense expenseToAdd) {
 		int insertedRows = 0;
 		
-		final String insertExpenseCommand = "INSERT INTO "+ ExpenseDatabaseEntry.TABLE_NAME + "("
+		final String insertExpenseCommand = "INSERT INTO "+ this.databaseTableName + "("
 				+ ExpenseDatabaseEntry.COLUMN_NAME + ","
 				+ ExpenseDatabaseEntry.COLUMN_CATEGORY + ","
 				+ ExpenseDatabaseEntry.COLUMN_DATE + ","
@@ -83,21 +93,21 @@ public class SQLiteDatabaseDataProvider implements DataProvider {
 			}
 		}
 		
-		return insertedRows > 0;
+		return insertedRows == 1;
 	}
 
 	@Override
 	public boolean deleteExpense(Expense expenseToDelete) {
-		final String deleteExpenseCommand = "DELETE FROM " + ExpenseDatabaseEntry.TABLE_NAME + " WHERE "
-				+ ExpenseDatabaseEntry.COLUMN_NAME + " = " + expenseToDelete.getName() + " AND "
-				+ ExpenseDatabaseEntry.COLUMN_CATEGORY + " = " + expenseToDelete.getCategory().toString() + " AND "
+		final String deleteExpenseCommand = "DELETE FROM " + this.databaseTableName + " WHERE "
+				+ ExpenseDatabaseEntry.COLUMN_NAME + " = \"" + expenseToDelete.getName() + "\" AND "
+				+ ExpenseDatabaseEntry.COLUMN_CATEGORY + " = \"" + expenseToDelete.getCategory().toString() + "\" AND "
 				+ ExpenseDatabaseEntry.COLUMN_DATE + " = " + expenseToDelete.getDate().getTime().getTime() + " AND "
-				+ ExpenseDatabaseEntry.COLUMN_PRICE + " = " + expenseToDelete.getPrice().toString() + ";";
+				+ ExpenseDatabaseEntry.COLUMN_PRICE + " = \"" + expenseToDelete.getPrice().toString() + "\"";
 		
 		
 		try {
 			Statement deleteExpenseStatement = connection.createStatement();
-			deleteExpenseStatement.execute(deleteExpenseCommand);
+			deleteExpenseStatement.executeUpdate(deleteExpenseCommand);
 			return true;
 		} catch (SQLException se) {
 			System.err.println(se.getMessage());
@@ -107,7 +117,7 @@ public class SQLiteDatabaseDataProvider implements DataProvider {
 
 	@Override
 	public void clearDatabase() {
-		final String clearDatabaseCommand = "DROP TABLE IF EXISTS " + ExpenseDatabaseEntry.TABLE_NAME + ";";
+		final String clearDatabaseCommand = "DROP TABLE IF EXISTS " + this.databaseTableName + ";";
 		
 		try {
 			Statement deleteExpenseStatement = connection.createStatement();
@@ -115,6 +125,7 @@ public class SQLiteDatabaseDataProvider implements DataProvider {
 		} catch (SQLException se) {
 			System.err.println(se.getMessage());
 		}
+		createTable();
 	}
 	
 	@Override
@@ -132,7 +143,9 @@ public class SQLiteDatabaseDataProvider implements DataProvider {
 		disconnect();
 	}
 	
+	@Override
 	public String getDatabaseFileName() { return this.databaseFileName; }
+	public String getDatabaseTableName() { return this.databaseTableName; }
 	
 	private void connect()
 	{
@@ -157,7 +170,7 @@ public class SQLiteDatabaseDataProvider implements DataProvider {
 	
 	private void createTable()
 	{
-		final String createTableCommand = "CREATE TABLE IF NOT EXISTS " + ExpenseDatabaseEntry.TABLE_NAME + "(\n"
+		final String createTableCommand = "CREATE TABLE IF NOT EXISTS " + this.databaseTableName + "(\n"
 				+ ExpenseDatabaseEntry._ID + " integer PRIMARY KEY,\n "
 				+ ExpenseDatabaseEntry.COLUMN_NAME + " text NOT NULL,\n "
 				+ ExpenseDatabaseEntry.COLUMN_CATEGORY + " text NOT NULL,\n "
@@ -182,8 +195,6 @@ public class SQLiteDatabaseDataProvider implements DataProvider {
 	 */
 	public static final class ExpenseDatabaseEntry
 	{
-		public static final String TABLE_NAME = "expenses";
-		
 		public static final String _ID = "id";
 		public static final String COLUMN_NAME = "name";
 		public static final String COLUMN_CATEGORY = "category";

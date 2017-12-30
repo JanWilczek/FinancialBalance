@@ -1,6 +1,9 @@
 package FinancialBalance.testing;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Calendar;
 
 import junit.framework.TestCase;
@@ -13,18 +16,25 @@ import FinancialBalance.FinancialBalance;
 public class FinancialBalanceTest extends TestCase {
 		FinancialBalance financialBalance;
 		
-		public FinancialBalanceTest() {}
-		
-		protected void setUp() {
+		protected void setUp()
+		{
 			financialBalance = new FinancialBalance("test");
 		}
 		
-		protected void tearDown() {
+		protected void tearDown() 
+		{
 			financialBalance.clearDatabase();
+			financialBalance.close();
+			try {
+				Files.deleteIfExists(Paths.get(financialBalance.getDatabaseFileName()));
+			} catch (IOException ioe) {
+				System.err.println(ioe.getMessage());
+			}
 		}
 		
 		@Test
-		public void testAddExpense(){
+		public void testAddExpense()
+		{
 			Expense expenseToAdd = new Expense("test", ExpenseCategory.School, Calendar.getInstance(), new BigDecimal("43.25"));
 			financialBalance.addExpense(expenseToAdd);
 			
@@ -37,7 +47,8 @@ public class FinancialBalanceTest extends TestCase {
 		}
 		
 		@Test
-		public void testDeleteExpenseByExpense(){
+		public void testDeleteExpenseByExpense()
+		{
 			Expense testExpense = new Expense("test", ExpenseCategory.Medicine, Calendar.getInstance(), new BigDecimal("43.25"));
 			financialBalance.addExpense(testExpense);
 			Expense expenseToAdd2 = new Expense("test2", ExpenseCategory.Other, Calendar.getInstance(), new BigDecimal("21.09"));
@@ -49,7 +60,8 @@ public class FinancialBalanceTest extends TestCase {
 		}
 		
 		@Test
-		public void testDeleteExpenseByIndex(){
+		public void testDeleteExpenseByIndex()
+		{
 			Expense testExpense = new Expense("test", ExpenseCategory.Medicine, Calendar.getInstance(), new BigDecimal("43.25"));
 			financialBalance.addExpense(testExpense);
 			Expense expenseToAdd2 = new Expense("test2", ExpenseCategory.Other, Calendar.getInstance(), new BigDecimal("21.09"));
@@ -61,7 +73,8 @@ public class FinancialBalanceTest extends TestCase {
 		}
 		
 		@Test
-		public void testClearDatabase(){
+		public void testClearDatabase()
+		{
 			Expense expenseToAdd = new Expense("test", ExpenseCategory.School, Calendar.getInstance(), new BigDecimal("43.25"));
 			financialBalance.addExpense(expenseToAdd);			
 			Expense expenseToAdd2 = new Expense("test2", ExpenseCategory.Other, Calendar.getInstance(), new BigDecimal("21.09"));

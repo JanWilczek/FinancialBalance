@@ -26,7 +26,10 @@ public final class TextfileDataProvider implements DataProvider {
 	
 	public TextfileDataProvider(String expensesFilePath)
 	{
-		this.expensesFilePath = expensesFilePath;
+		if (expensesFilePath.endsWith(".txt")) this.expensesFilePath = expensesFilePath;
+		else this.expensesFilePath = expensesFilePath + ".txt";
+		
+		expensesFile = Paths.get(this.expensesFilePath);
 	}
 	
 	@Override
@@ -101,12 +104,14 @@ public final class TextfileDataProvider implements DataProvider {
 		updateDatabase(expenses);
 	}
 	
+	@Override
+	public String getDatabaseFileName(){ return expensesFilePath; }
+	
 	/**
 	 * Opens the database file or creates a new one.
 	 */
 	private List<Expense> openExpensesFile()
 	{
-		expensesFile = Paths.get(expensesFilePath);
 		if (Files.exists(expensesFile))
 		{
 			// Read all expenses from the .txt file

@@ -110,6 +110,4 @@ public class Expense implements Comparable<Expense> {
 	{
 		this.price = price;
 	}
-	
-	// Other methods
 }

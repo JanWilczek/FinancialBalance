@@ -50,4 +50,9 @@ public interface DataProvider {
 	 * @param expenses
 	 */
 	public void updateDatabase(List<Expense> expenses);
+	
+	/**
+	 * @return name of the file database is stored in
+	 */
+	public String getDatabaseFileName();
 }

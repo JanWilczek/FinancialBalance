@@ -219,41 +219,66 @@ public class AppFrame extends JFrame {
 		mainLayoutConstraints.weighty = weighty;
 	}
 	
+	private void addEnteredExpense() {
+		// Check for date correctness
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+		Calendar expenseDate = Calendar.getInstance();
+		try {
+			expenseDate.setTime(simpleDateFormat.parse(simpleDateFormat.format((Date) dateField.getValue())));
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(AppFrame.this, "Incorrect date format!", "Error",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		// Check for price correctness
+		BigDecimal expensePrice = null;
+		try {
+			expensePrice = new BigDecimal(priceField.getValue().toString());
+		} catch (NumberFormatException nfe) {
+			JOptionPane.showMessageDialog(AppFrame.this, "Incorrect price format!", "Error",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		Expense expenseToAdd = new Expense(nameField.getText(),
+				(ExpenseCategory) categoryCombo.getSelectedItem(), expenseDate, expensePrice);
+		int index = financialBalance.addExpense(expenseToAdd);	// Add the expense to the main logic object.
+		DefaultTableModel model = (DefaultTableModel) expensesTable.getModel();
+
+		model.insertRow(index, new Object[] {expenseToAdd.getName(), expenseToAdd.getCategory(), simpleDateFormat.format(expenseToAdd.getDate().getTime()), expenseToAdd.getPrice()});
+
+		// Reset nameField and priceField to their defaults. Leave the category and the date in case user wanted to add several objects with the same category or date.
+		nameField.setText(defaultName);
+		priceField.setValue("0.00");
+	}
+
+	private void deleteSelectedExpenses() {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+		int[] selectedRows = expensesTable.getSelectedRows();
+		int[] rowsToDelete = new int[selectedRows.length];
+		int j = 0;
+		for (int i : selectedRows) {
+			Calendar cal = Calendar.getInstance();
+			try{cal.setTime(sdf.parse((String)expensesTable.getValueAt(i, 2)));}
+			catch(ParseException pe){pe.printStackTrace(); return;	}
+			Expense expenseToDelete = new Expense((String) expensesTable.getValueAt(i, 0),
+													(ExpenseCategory) expensesTable.getValueAt(i, 1),
+													cal,
+													(BigDecimal)expensesTable.getValueAt(i, 3));
+			boolean successDelete = financialBalance.deleteExpense(expenseToDelete);
+			if (successDelete) rowsToDelete[j++] = i;
+		}
+		SwingUtilities.invokeLater(new RowRemover(rowsToDelete));	// schedules the row-removing process
+		
+		// TODO: Update monthly reports' table.
+	}
+
 	//Inner listeners
 	class AddButtonListener implements ActionListener
 	{
 		@Override
 		public void actionPerformed(ActionEvent ae) {
 			if (ae.getSource().equals(addButton)) {
-				// Check for date correctness
-				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
-				Calendar expenseDate = Calendar.getInstance();
-				try {
-					expenseDate.setTime(simpleDateFormat.parse(simpleDateFormat.format((Date) dateField.getValue())));
-				} catch (Exception e) {
-					JOptionPane.showMessageDialog(AppFrame.this, "Incorrect date format!", "Error",
-							JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-				// Check for price correctness
-				BigDecimal expensePrice = null;
-				try {
-					expensePrice = new BigDecimal(priceField.getValue().toString());
-				} catch (NumberFormatException nfe) {
-					JOptionPane.showMessageDialog(AppFrame.this, "Incorrect price format!", "Error",
-							JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-				Expense expenseToAdd = new Expense(nameField.getText(),
-						(ExpenseCategory) categoryCombo.getSelectedItem(), expenseDate, expensePrice);
-				int index = financialBalance.addExpense(expenseToAdd);	// Add the expense to the main logic object.
-				DefaultTableModel model = (DefaultTableModel) expensesTable.getModel();
-
-				model.insertRow(index, new Object[] {expenseToAdd.getName(), expenseToAdd.getCategory(), simpleDateFormat.format(expenseToAdd.getDate().getTime()), expenseToAdd.getPrice()});
-
-				// Reset nameField and priceField to their defaults. Leave the category and the date in case user wanted to add several objects with the same category or date.
-				nameField.setText(defaultName);
-				priceField.setValue("0.00");
+				addEnteredExpense();
 			}
 		}	
 	}
@@ -315,25 +340,8 @@ public class AppFrame extends JFrame {
 				int decision = JOptionPane.showConfirmDialog(mainPanel, "Are You sure, You want to delete selected expense(s) from database?", "Delete selected expense(s)", JOptionPane.YES_NO_OPTION);
 				if (decision == JOptionPane.YES_NO_OPTION)
 				{
-					SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-					int[] selectedRows = expensesTable.getSelectedRows();
-					int[] rowsToDelete = new int[selectedRows.length];
-					int j = 0;
-					for (int i : selectedRows ) {
-						Calendar cal = Calendar.getInstance();
-						try{cal.setTime(sdf.parse((String)expensesTable.getValueAt(i, 2)));}
-						catch(ParseException pe){pe.printStackTrace(); return;	}
-						Expense expenseToDelete = new Expense((String) expensesTable.getValueAt(i, 0),
-																(ExpenseCategory) expensesTable.getValueAt(i, 1),
-																cal,
-																(BigDecimal)expensesTable.getValueAt(i, 3));
-						boolean successDelete = financialBalance.deleteExpense(expenseToDelete);
-						if (successDelete) rowsToDelete[j++] = i;
-					}
-					SwingUtilities.invokeLater(new RowRemover(rowsToDelete));	// schedules the row-removing process
+					deleteSelectedExpenses();
 				}
-				
-				// TODO: Update monthly reports' table.
 			}
 		}
 
