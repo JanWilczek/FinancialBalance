@@ -109,6 +109,7 @@ public final class TextfileDataProvider implements DataProvider {
 	
 	/**
 	 * Opens the database file or creates a new one.
+	 * @return expenses from the database
 	 */
 	private List<Expense> openExpensesFile()
 	{
@@ -118,7 +119,7 @@ public final class TextfileDataProvider implements DataProvider {
 			try {
 				List<String> expensesStrings = Files.readAllLines(expensesFile, charset);
 				if (expensesStrings.size() > 0) {
-					return readExpensesFromFile(expensesStrings);
+					return parseExpenses(expensesStrings);
 				}
 			} catch (IOException ioe) {
 				ioe.printStackTrace();
@@ -151,10 +152,11 @@ public final class TextfileDataProvider implements DataProvider {
 	}
 
 	/**
-	 * Reads database content from a list of lines (strings) to the internal container.
+	 * Parses expenses from the given strings.
 	 * @param expensesStrings
+	 * @return parsed expenses
 	 */
-	private List<Expense> readExpensesFromFile(List<String> expensesStrings) {
+	private List<Expense> parseExpenses(List<String> expensesStrings) {
 		List<Expense> expenses = new LinkedList<Expense>();	
 		String[] expenseString = new String[4];
 		for (String s : expensesStrings) {
