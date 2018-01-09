@@ -33,7 +33,7 @@ public interface DataProvider {
 	public boolean deleteExpense(Expense expenseToDelete);
 	
 	//	TODO: To implement.
-	//public void updateExpense(Expense expenseToUpdate, Expense expenseUpdated);
+	//public boolean updateExpense(Expense expenseToUpdate, Expense expenseUpdated);
 	
 	/**
 	 * Clears the internal database. Use with care.

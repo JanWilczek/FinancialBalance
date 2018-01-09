@@ -38,7 +38,10 @@ import java.util.Map;
  */
 public class AppFrame extends JFrame {
 	
-
+	/**
+	 * Public constructor.
+	 * @param financialBalance
+	 */
 	public AppFrame(FinancialBalance financialBalance)
 	{
 		this.financialBalance = financialBalance;

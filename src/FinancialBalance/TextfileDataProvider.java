@@ -57,7 +57,7 @@ public final class TextfileDataProvider implements DataProvider {
 			}
 			for (Expense expense : expenses) {
 				try {
-					Files.write(expensesFile, (expense.toDatabaseString() + System.lineSeparator()).getBytes(charset), StandardOpenOption.CREATE,
+					Files.write(expensesFile, (expense.toDatabaseString("/") + System.lineSeparator()).getBytes(charset), StandardOpenOption.CREATE,
 							StandardOpenOption.APPEND);
 				} catch (IOException ioe) {
 					ioe.printStackTrace();
@@ -68,7 +68,7 @@ public final class TextfileDataProvider implements DataProvider {
 	@Override
 	public boolean addExpense(Expense expenseToAdd) {
 		try {
-			Files.write(expensesFile, (expenseToAdd.toDatabaseString() + System.lineSeparator()).getBytes(charset), StandardOpenOption.CREATE,
+			Files.write(expensesFile, (expenseToAdd.toDatabaseString("/") + System.lineSeparator()).getBytes(charset), StandardOpenOption.CREATE,
 					StandardOpenOption.APPEND);
 			return true;
 		} catch (IOException ioe) {
@@ -83,7 +83,7 @@ public final class TextfileDataProvider implements DataProvider {
 		{
 			try {
 				List<String> expensesStrings = Files.readAllLines(expensesFile, charset);
-				String stringToDelete = expenseToDelete.toDatabaseString();
+				String stringToDelete = expenseToDelete.toDatabaseString("/");
 				if (expensesStrings.remove(stringToDelete))	// BUG!!!
 				{
 					Files.delete(expensesFile);

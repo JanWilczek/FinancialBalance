@@ -5,8 +5,9 @@ import java.util.Calendar;
 import java.lang.Comparable;
 
 /**
- * A class representing an expense.
+ * Class representing an expense.
  * @author Jan Wilczek
+ * @version 1.0
  */
 public class Expense implements Comparable<Expense> {
 	private String name;
@@ -16,7 +17,14 @@ public class Expense implements Comparable<Expense> {
 	
 	
 	// Constructors
-	public Expense(String name, ExpenseCategory category, Calendar date, BigDecimal price)	//TODO: Change Date to Calendar or an other class
+	/**
+	 * Creates an expense with the given parameters.
+	 * @param name
+	 * @param category
+	 * @param date
+	 * @param price
+	 */
+	public Expense(String name, ExpenseCategory category, Calendar date, BigDecimal price)
 	{
 		this.name = name;
 		this.category = category;
@@ -24,6 +32,12 @@ public class Expense implements Comparable<Expense> {
 		this.price = price;
 	}
 	
+	/**
+	 * Creates an expense with the given parameters. Category defaults to <code>ExpenseCategory.Other</code>.
+	 * @param name
+	 * @param date
+	 * @param price
+	 */
 	public Expense(String name, Calendar date, BigDecimal price)
 	{
 		this.name = name;
@@ -32,6 +46,9 @@ public class Expense implements Comparable<Expense> {
 		this.price = price;
 	}
 	
+	/**
+	 * Creates an expense with an empty name, category equal to <code>ExpenseCategory.Other</code>, current date and price equal to 0.
+	 */
 	public Expense()
 	{
 		this.name = "";
@@ -64,9 +81,13 @@ public class Expense implements Comparable<Expense> {
 		return getName() + " " + getCategory() + " " + getDate() + " " + getPrice();
 	}
 	
-	public String toDatabaseString()
+	/**
+	 * @param fieldSeparator
+	 * @return String with all fields' values separated by the given separator 
+	 */
+	public String toDatabaseString(String fieldSeparator)
 	{
-		return getName() + "/" + getCategory() + "/" + getDate().getTime().getTime() + "/" + getPrice();
+		return getName() + fieldSeparator + getCategory() + fieldSeparator + getDate().getTime().getTime() + fieldSeparator + getPrice();
 	}
 	
 	// Getters
@@ -91,22 +112,22 @@ public class Expense implements Comparable<Expense> {
 	}
 	
 	// Setters
-	void setDate(Calendar date)
+	public void setDate(Calendar date)
 	{
 		this.date = date;
 	}
 	
-	void setName(String name)
+	public void setName(String name)
 	{
 		this.name = name;
 	}
 	
-	void setCategory(ExpenseCategory category)
+	public void setCategory(ExpenseCategory category)
 	{
 		this.category = category;
 	}
 	
-	void setPrice(BigDecimal price)
+	public void setPrice(BigDecimal price)
 	{
 		this.price = price;
 	}

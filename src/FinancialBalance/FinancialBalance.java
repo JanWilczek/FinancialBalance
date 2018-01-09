@@ -31,7 +31,7 @@ import java.time.YearMonth;
  * 
  * @version 1.0
  * 
- * The main logic-handling class providing FinancialBalance interface.
+ * The main logic-handling class providing application's interface.
  *
  */
 public class FinancialBalance {
@@ -40,6 +40,10 @@ public class FinancialBalance {
 	private DataProvider dataProvider;
 	private String name;	
 	
+	/**
+	 * Public constructor. Requires a name for the database.
+	 * @param name
+	 */
 	public FinancialBalance(String name)
 	{
 		this.name = name;
@@ -56,8 +60,7 @@ public class FinancialBalance {
 	// Public members functions
 	
 	/**
-	 * Adds an expense to the internal container.
-	 * A call to this function does not add an according record in the database. In order to do that updateDatbase() needs to be called after, what is marked by databaseUpdateScheduled flag.
+	 * Adds an expense to the database.
 	 * @param expenseToAdd
 	 * @return index at which the expense was added
 	 */
@@ -66,15 +69,20 @@ public class FinancialBalance {
 		if (dataProvider.addExpense(expenseToAdd)) {
 			expenses.add(expenseToAdd);
 			Collections.sort(expenses); // TODO: [RESEARCH] Is there a better way to do it than sorting all elements? Is sorting them costly?
-			generateMonthlyReports();
+			generateMonthlyReports();	// TODO: Change it to raising an event
 			return expenses.indexOf(expenseToAdd);
 		}
 		return -1;
 	}
 	
 	/**
-	 * Deletes the given expense from the internal container.
-	 * A call to this function does not delete the according record in the database. In order to do that updateDatbase() needs to be called after, what is marked by databaseUpdateScheduled flag.
+	 * Adds a range of expenses to the database.
+	 */
+	//TODO: To implement.
+	//public int addExpenses(List<Expense> expensesToAdd)
+	
+	/**
+	 * Deletes the given expense from the database.
 	 * @param expenseToDelete
 	 * @return boolean value stating if the expense has been found and deleted
 	 */
@@ -83,7 +91,7 @@ public class FinancialBalance {
 		if (dataProvider.deleteExpense(expenseToDelete))
 		{
 			expenses.remove(expenseToDelete);
-			generateMonthlyReports();
+			generateMonthlyReports();	// TODO: Change it to raising an event
 			return true;			
 		}
 		return false;
@@ -91,7 +99,6 @@ public class FinancialBalance {
 	
 	/**
 	 * Deletes expense at the given index from the internal container.
-	 * A call to this function does not delete the according record in the database. In order to do that updateDatbase() needs to be called after, what is marked by databaseUpdateScheduled flag.
 	 * @param expenseToDeleteIndex
 	 * @return boolean value stating if the expense has been found and deleted
 	 */
@@ -99,17 +106,16 @@ public class FinancialBalance {
 	{
 		if (dataProvider.deleteExpense(expenses.get(expenseToDeleteIndex)))
 		{
-				expenses.remove(expenseToDeleteIndex);
-				generateMonthlyReports();
-				return true;
+			expenses.remove(expenseToDeleteIndex);
+			generateMonthlyReports();	// TODO: Change it to raising an event.
+			return true;
 		}
 		return false;
 	}
 	
 	
 	/**
-	 * @return expenses
-	 *  the internal container of expenses
+	 * @return the internal container of expenses
 	 */
 	public List<Expense> getExpenses()
 	{
@@ -117,8 +123,7 @@ public class FinancialBalance {
 	}
 	
 	/**
-	 * @return monthly reports
-	 * The expenses monthly reports generated from the database.
+	 * @return monthly reports generated from the database.
 	 */
 	public Map<YearMonth, MonthlyReport> getMonthlyReports()
 	{
