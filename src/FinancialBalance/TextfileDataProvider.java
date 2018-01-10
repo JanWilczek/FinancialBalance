@@ -150,7 +150,8 @@ public final class TextfileDataProvider implements DataProvider {
 		}
 		return null;
 	}
-
+	
+	// TODO: Make this method public and static
 	/**
 	 * Parses expenses from the given strings.
 	 * @param expensesStrings
