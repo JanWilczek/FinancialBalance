@@ -4,9 +4,6 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-
-import javax.swing.JOptionPane;
 
 import java.lang.Comparable;
 
@@ -149,7 +146,7 @@ public class Expense implements Comparable<Expense> {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
 		Calendar parsedDate = Calendar.getInstance();
 		parsedDate.setTime(simpleDateFormat.parse(expenseDate));
-		//expenseDate.setTime(simpleDateFormat.parse(simpleDateFormat.format(Date.parse(expenseDate))));
+
 		// Parse price
 		BigDecimal parsedPrice = null;
 		parsedPrice = new BigDecimal(expensePrice);

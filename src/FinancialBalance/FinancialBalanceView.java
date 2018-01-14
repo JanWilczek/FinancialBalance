@@ -16,10 +16,6 @@ import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
-import FinancialBalance.threading.PlotFrameRunner;
-
-import java.math.BigDecimal;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -48,7 +44,6 @@ public class FinancialBalanceView extends JFrame {
 	public FinancialBalanceView(FinancialBalance financialBalance)
 	{
 		this.financialBalance = financialBalance;
-		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		this.setSize(baseWidth, baseHeight);
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		Dimension dim = tk.getScreenSize();
@@ -73,31 +68,30 @@ public class FinancialBalanceView extends JFrame {
 		
 		// addPanel content:
 		//Creating a text field for the expense name
-		nameField = new JTextField(defaultName);
-		nameField.addFocusListener(new NameAndPriceFieldListener());
-		addPanel.add(nameField);
+		setNameField(new JTextField(getDefaultExpenseName()));
+		getNameField().addFocusListener(new NameAndPriceFieldListener());
+		addPanel.add(getNameField());
 		
 		//Creating a drop-down menu with the expense categories
-		categoryCombo = new JComboBox<ExpenseCategory>(ExpenseCategory.values());
-		addPanel.add(categoryCombo);
+		setCategoryCombo(new JComboBox<ExpenseCategory>(ExpenseCategory.values()));
+		addPanel.add(getCategoryCombo());
 		
 		//Creating a field to input date of the expense
-		dateField = new JSpinner(new SpinnerDateModel(new Date(), null, new Date(), Calendar.DAY_OF_MONTH));
-		JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(dateField,  "dd-MM-yy");
-		dateField.setEditor(dateEditor);
-		dateField.setSize(6, nameField.getHeight());	// TODO: doesn't work
-		addPanel.add(dateField);
+		setDateField(new JSpinner(new SpinnerDateModel(new Date(), null, new Date(), Calendar.DAY_OF_MONTH)));
+		JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(getDateField(),  "dd-MM-yy");
+		getDateField().setEditor(dateEditor);
+		getDateField().setSize(6, getNameField().getHeight());	// TODO: doesn't work
+		addPanel.add(getDateField());
 		
 		//Creating a field for price input
-		priceField = new JFormattedTextField();
-		priceField.setValue("0.00");
-		priceField.setColumns(4);
-		priceField.addFocusListener(new NameAndPriceFieldListener());
-		addPanel.add(priceField);
+		setPriceField(new JFormattedTextField());
+		getPriceField().setValue("0.00");
+		getPriceField().setColumns(4);
+		getPriceField().addFocusListener(new NameAndPriceFieldListener());
+		addPanel.add(getPriceField());
 		
 		//Creating an 'Add' button to add new expenses
 		addButton = new JButton("Add expense");
-		addButton.addActionListener(new AddButtonListener());
 		addPanel.add(addButton);
 		
 		setLayoutConstraints(1,0,1,1,0.7,0);	// Second column, first row, 1x1 cell large, 70% of the GUI's width and let Java decide how much height
@@ -107,7 +101,6 @@ public class FinancialBalanceView extends JFrame {
 		
 		// tableScrollPane content
 		generateExpensesTable();
-		expensesTable.addKeyListener(new DeletePressedListener());
 		
 		// Create menu
 		menuBar = new JMenuBar();
@@ -119,7 +112,6 @@ public class FinancialBalanceView extends JFrame {
 		
 		statisticsMenuItem = new JMenuItem("Statistics", KeyEvent.VK_S);
 		statisticsMenuItem.getAccessibleContext().setAccessibleDescription("Show statistics of all expenses.");
-		statisticsMenuItem.addActionListener(new StatisticsMenuListener());
 		viewMenu.add(statisticsMenuItem);
 		
 		this.setJMenuBar(menuBar);
@@ -131,10 +123,7 @@ public class FinancialBalanceView extends JFrame {
 		}
 		
 		this.add(mainPanel);
-		this.addWindowListener(new WindowClosingListener());
-		this.setResizable(true);
-		this.setVisible(true);
-			
+		this.setResizable(true);			
 	}
 
 	/**
@@ -183,7 +172,6 @@ public class FinancialBalanceView extends JFrame {
 			se.printStackTrace();
 		}
 		
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 		//Get the expense data as a two-dimensional Object array
 		Object[][] expensesData = null;
 		if (columnNames != null) 
@@ -195,7 +183,7 @@ public class FinancialBalanceView extends JFrame {
 				{
 					expensesData[i][0] = expense.getName();
 					expensesData[i][1] = expense.getCategory();
-					expensesData[i][2] = simpleDateFormat.format(expense.getDate().getTime());
+					expensesData[i][2] = getSimpleDateFormat().format(expense.getDate().getTime());
 					expensesData[i][3] = expense.getPrice();
 					i++;
 				}
@@ -231,81 +219,7 @@ public class FinancialBalanceView extends JFrame {
 		mainLayoutConstraints.weighty = weighty;
 	}
 	
-	private void addEnteredExpense() {
-		// Check for date correctness
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
-		Calendar expenseDate = Calendar.getInstance();
-		try {
-			expenseDate.setTime(simpleDateFormat.parse(simpleDateFormat.format((Date) dateField.getValue())));
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(FinancialBalanceView.this, "Incorrect date format!", "Error",
-					JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		// Check for price correctness
-		BigDecimal expensePrice = null;
-		try {
-			expensePrice = new BigDecimal(priceField.getValue().toString());
-		} catch (NumberFormatException nfe) {
-			JOptionPane.showMessageDialog(FinancialBalanceView.this, "Incorrect price format!", "Error",
-					JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		Expense expenseToAdd = new Expense(nameField.getText(),
-				(ExpenseCategory) categoryCombo.getSelectedItem(), expenseDate, expensePrice);
-		/*Expense expenseToAdd = null;
-		try {
-			expenseToAdd = Expense.parseExpense(nameField.getText(), categoryCombo.getSelectedItem().toString(), dateField.getValue().toString(), priceField.getValue().toString(), "yyyy/MM/dd");
-		} catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
-
-		*/
-		int index = financialBalance.addExpense(expenseToAdd);	// Add the expense to the main logic object.
-		DefaultTableModel model = (DefaultTableModel) expensesTable.getModel();
-		model.insertRow(index, new Object[] {expenseToAdd.getName(), expenseToAdd.getCategory(), simpleDateFormat.format(expenseToAdd.getDate().getTime()), expenseToAdd.getPrice()});
-
-		// Reset nameField and priceField to their defaults. Leave the category and the date in case user wanted to add several objects with the same category or date.
-		nameField.setText(defaultName);
-		priceField.setValue("0.00");
-	}
-
-	private void deleteSelectedExpenses() {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-		int[] selectedRows = expensesTable.getSelectedRows();
-		int[] rowsToDelete = new int[selectedRows.length];
-		int j = 0;
-		for (int i : selectedRows) {
-			Calendar cal = Calendar.getInstance();
-			try{cal.setTime(sdf.parse((String)expensesTable.getValueAt(i, 2)));}
-			catch(ParseException pe){System.err.println(pe.getMessage());; return;	}
-			Expense expenseToDelete = new Expense((String) expensesTable.getValueAt(i, 0),
-													(ExpenseCategory) expensesTable.getValueAt(i, 1),
-													cal,
-													(BigDecimal)expensesTable.getValueAt(i, 3));							
-			boolean successDelete = financialBalance.deleteExpense(expenseToDelete);
-			if (successDelete) rowsToDelete[j++] = i;
-		}
-		SwingUtilities.invokeLater(new RowRemover(rowsToDelete));	// schedules the row-removing process
-		
-		// TODO: Update monthly reports' table.
-	}
-
-	//Inner listeners
-	class AddButtonListener implements ActionListener
-	{
-		@Override
-		public void actionPerformed(ActionEvent ae) {
-			if (ae.getSource().equals(addButton)) {
-				addEnteredExpense();
-			}
-		}	
-	}
+	// Inner listeners
 	
 	// private members
 	// a helper inner class responsible for user-friendly text box interaction
@@ -314,18 +228,18 @@ public class FinancialBalanceView extends JFrame {
 
 		@Override
 		public void focusGained(FocusEvent fe) {
-			if (fe.getSource().equals(nameField))
+			if (fe.getSource().equals(getNameField()))
 			{
-				if (nameField.getText().equals(defaultName))
+				if (getNameField().getText().equals(getDefaultExpenseName()))
 				{
-					nameField.setText("");
+					getNameField().setText("");
 				}
 			}
-			else if (fe.getSource().equals(priceField))
+			else if (fe.getSource().equals(getPriceField()))
 			{
-				if (priceField.getText().equals("0.00"))
+				if (getPriceField().getText().equals("0.00"))
 				{
-					priceField.setText("");
+					getPriceField().setText("");
 				}
 			}
 		}
@@ -333,102 +247,43 @@ public class FinancialBalanceView extends JFrame {
 		@Override
 		public void focusLost(FocusEvent fe)
 		{
-			if (fe.getSource().equals(nameField))
+			if (fe.getSource().equals(getNameField()))
 			{
-				if (nameField.getText().length() == 0)
+				if (getNameField().getText().length() == 0)
 				{
-					nameField.setText(defaultName);
+					getNameField().setText(getDefaultExpenseName());
 				}
 			}
-			else if (fe.getSource().equals(priceField))
+			else if (fe.getSource().equals(getPriceField()))
 			{
-				if (priceField.getText().equals(""))
+				if (getPriceField().getText().equals(""))
 				{
-					priceField.setText("0.00");
+					getPriceField().setText("0.00");
 				}
 			}
 		}
 		
 	}
-	
-	// table event listener
-	private class DeletePressedListener implements KeyListener {
-
-		@Override
-		public void keyPressed(KeyEvent arg0) {}
-
-		@Override
-		public void keyReleased(KeyEvent ke) {
-			if (ke.getKeyCode()==KeyEvent.VK_DELETE && expensesTable.getSelectedRowCount() > 0)
-			{
-				int decision = JOptionPane.showConfirmDialog(mainPanel, "Are You sure, You want to delete selected expense(s) from database?", "Delete selected expense(s)", JOptionPane.YES_NO_OPTION);
-				if (decision == JOptionPane.YES_NO_OPTION)
-				{
-					deleteSelectedExpenses();
-				}
-			}
-		}
-
-		@Override
-		public void keyTyped(KeyEvent arg0) {}
-	}
-	
-	// window closed listener
-	private class WindowClosingListener implements WindowListener{
-
-		@Override
-		public void windowActivated(WindowEvent e) {}
-
-		@Override
-		public void windowClosed(WindowEvent e) {}
-
-		@Override
-		public void windowClosing(WindowEvent e) {
-			financialBalance.close();			
-		}
-
-		@Override
-		public void windowDeactivated(WindowEvent e) {}
-
-		@Override
-		public void windowDeiconified(WindowEvent e) {}
-
-		@Override
-		public void windowIconified(WindowEvent e) {}
-
-		@Override
-		public void windowOpened(WindowEvent e) {}
-	}
-	
-	class StatisticsMenuListener implements ActionListener{
-		@Override
-		public void actionPerformed(ActionEvent ae) {
-			if (ae.getSource().equals(statisticsMenuItem)){
-				SwingUtilities.invokeLater(new PlotFrameRunner(financialBalance.getMonthlyReports()));
-			}
-			
-		}
-	}
-	
-	// a row removing utility working on a separate thread
-	private class RowRemover implements Runnable{
-		private int[] rowsToRemove;
 		
-		public RowRemover(int[] rowsToRemove){
-			this.rowsToRemove = rowsToRemove;
-		}
-		
-		@Override
-		public void run(){
-			synchronized (expensesTable){
-				DefaultCellEditor defaultCellEditor = (DefaultCellEditor)expensesTable.getCellEditor(); 
-				if (defaultCellEditor != null) defaultCellEditor.stopCellEditing();	// IMPORTANT! Otherwise the operation won't be completed successfully
-				DefaultTableModel model = (DefaultTableModel) expensesTable.getModel();
-				for (int i = rowsToRemove.length-1; i>=0; i--) model.removeRow(rowsToRemove[i]);	// Rows are removed in lowering index order, otherwise the inappropriate rows would be removed.
-			}
-		}
-	}
-			
+	// public getters
+	public JTable getExpensesTable() { return this.expensesTable; }
+	public JButton getAddButton() { return this.addButton; }
+	public JTextField getNameField() {	return nameField;	}
+	public void setNameField(JTextField nameField) {this.nameField = nameField;	}
+	public JComboBox<ExpenseCategory> getCategoryCombo() {	return categoryCombo; }
+	public void setCategoryCombo(JComboBox<ExpenseCategory> categoryCombo) {this.categoryCombo = categoryCombo;	}
+	public JSpinner getDateField() {return dateField;}
+	public void setDateField(JSpinner dateField) {this.dateField = dateField;}
+	public JFormattedTextField getPriceField() {return priceField;	}
+	public void setPriceField(JFormattedTextField priceField) {	this.priceField = priceField;}
+	public SimpleDateFormat getSimpleDateFormat() {	return simpleDateFormat;}
+	public void setSimpleDateFormat(SimpleDateFormat simpleDateFormat) {this.simpleDateFormat = simpleDateFormat;}
+	public String getDefaultExpenseName() {return defaulExpensetName;	}
+	public void setDefaultExpenseName(String defaultName) {this.defaulExpensetName = defaultName;	}
+	public JPanel getMainPanel() {	return this.mainPanel; }
+	public JPanel getAddPanel() { return addPanel;}
+	public JMenuItem getStatisticsMenuItem() { return statisticsMenuItem;}
+
 	// inner application logic
 	private FinancialBalance financialBalance;
 	
@@ -462,8 +317,11 @@ public class FinancialBalanceView extends JFrame {
 	// layout constraints used to adjust every GridBagLayout element
 	private GridBagConstraints mainLayoutConstraints;
 	
+	// date format
+	private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+	
 	// other private members
-	private String defaultName = "Insert the expense name here...               ";
+	private String defaulExpensetName = "Insert the expense name here...               ";
 	private int baseWidth = 850;
 	private int baseHeight = 500;
 	

@@ -8,6 +8,7 @@ import org.junit.runners.Suite;
 	FinancialBalanceTest.class,
 	MonthlyReportTest.class,
 	TextfileDataProviderTest.class,
-	SQLiteDatabaseDataProviderTest.class
+	SQLiteDatabaseDataProviderTest.class,
+	ExpenseTest.class
 })
 public class FinancialBalanceTestSuite {}
