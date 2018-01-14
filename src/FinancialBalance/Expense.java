@@ -1,7 +1,13 @@
 package FinancialBalance;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+
+import javax.swing.JOptionPane;
+
 import java.lang.Comparable;
 
 /**
@@ -130,5 +136,26 @@ public class Expense implements Comparable<Expense> {
 	public void setPrice(BigDecimal price)
 	{
 		this.price = price;
+	}
+	
+	// static methods
+	public static Expense parseExpense(String expenseName, 
+			String expenseCategory, 
+			String expenseDate, 
+			String expensePrice,  
+			String dateFormat) throws ParseException, NumberFormatException
+	{
+		// Parse date
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
+		Calendar parsedDate = Calendar.getInstance();
+		parsedDate.setTime(simpleDateFormat.parse(expenseDate));
+		//expenseDate.setTime(simpleDateFormat.parse(simpleDateFormat.format(Date.parse(expenseDate))));
+		// Parse price
+		BigDecimal parsedPrice = null;
+		parsedPrice = new BigDecimal(expensePrice);
+		
+		Expense parsedExpense = new Expense(expenseName, ExpenseCategory.valueOf(expenseCategory), parsedDate, parsedPrice);
+		
+		return parsedExpense;
 	}
 }

@@ -1,6 +1,6 @@
 package FinancialBalance.threading;
 
-import FinancialBalance.AppFrame;
+import FinancialBalance.FinancialBalanceView;
 import FinancialBalance.FinancialBalance;
 
 /**
@@ -23,6 +23,6 @@ public class AppFrameRunner implements Runnable
 	@Override
 	public void run() {
 		@SuppressWarnings("unused")
-		AppFrame frame = new AppFrame(financialBalance);
+		FinancialBalanceView frame = new FinancialBalanceView(financialBalance);
 	}
 }

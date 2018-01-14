@@ -3,11 +3,14 @@ package FinancialBalance;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
 import java.awt.Insets;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.lang.reflect.Field;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
@@ -36,13 +39,13 @@ import java.util.Map;
  * A class responsible for application's GUI layout.
  * Bases on GridBagLayout.
  */
-public class AppFrame extends JFrame {
+public class FinancialBalanceView extends JFrame {
 	
 	/**
 	 * Public constructor.
 	 * @param financialBalance
 	 */
-	public AppFrame(FinancialBalance financialBalance)
+	public FinancialBalanceView(FinancialBalance financialBalance)
 	{
 		this.financialBalance = financialBalance;
 		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -120,6 +123,12 @@ public class AppFrame extends JFrame {
 		viewMenu.add(statisticsMenuItem);
 		
 		this.setJMenuBar(menuBar);
+		
+		try {
+			this.setIconImage(ImageIO.read(new File("img/icon.png")));
+		} catch (IOException ioe) {
+			System.err.println(ioe.getMessage());
+		}
 		
 		this.add(mainPanel);
 		this.addWindowListener(new WindowClosingListener());
@@ -229,7 +238,7 @@ public class AppFrame extends JFrame {
 		try {
 			expenseDate.setTime(simpleDateFormat.parse(simpleDateFormat.format((Date) dateField.getValue())));
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(AppFrame.this, "Incorrect date format!", "Error",
+			JOptionPane.showMessageDialog(FinancialBalanceView.this, "Incorrect date format!", "Error",
 					JOptionPane.ERROR_MESSAGE);
 			return;
 		}
@@ -238,15 +247,27 @@ public class AppFrame extends JFrame {
 		try {
 			expensePrice = new BigDecimal(priceField.getValue().toString());
 		} catch (NumberFormatException nfe) {
-			JOptionPane.showMessageDialog(AppFrame.this, "Incorrect price format!", "Error",
+			JOptionPane.showMessageDialog(FinancialBalanceView.this, "Incorrect price format!", "Error",
 					JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		Expense expenseToAdd = new Expense(nameField.getText(),
 				(ExpenseCategory) categoryCombo.getSelectedItem(), expenseDate, expensePrice);
+		/*Expense expenseToAdd = null;
+		try {
+			expenseToAdd = Expense.parseExpense(nameField.getText(), categoryCombo.getSelectedItem().toString(), dateField.getValue().toString(), priceField.getValue().toString(), "yyyy/MM/dd");
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+
+		*/
 		int index = financialBalance.addExpense(expenseToAdd);	// Add the expense to the main logic object.
 		DefaultTableModel model = (DefaultTableModel) expensesTable.getModel();
-
 		model.insertRow(index, new Object[] {expenseToAdd.getName(), expenseToAdd.getCategory(), simpleDateFormat.format(expenseToAdd.getDate().getTime()), expenseToAdd.getPrice()});
 
 		// Reset nameField and priceField to their defaults. Leave the category and the date in case user wanted to add several objects with the same category or date.
@@ -262,11 +283,11 @@ public class AppFrame extends JFrame {
 		for (int i : selectedRows) {
 			Calendar cal = Calendar.getInstance();
 			try{cal.setTime(sdf.parse((String)expensesTable.getValueAt(i, 2)));}
-			catch(ParseException pe){pe.printStackTrace(); return;	}
+			catch(ParseException pe){System.err.println(pe.getMessage());; return;	}
 			Expense expenseToDelete = new Expense((String) expensesTable.getValueAt(i, 0),
 													(ExpenseCategory) expensesTable.getValueAt(i, 1),
 													cal,
-													(BigDecimal)expensesTable.getValueAt(i, 3));
+													(BigDecimal)expensesTable.getValueAt(i, 3));							
 			boolean successDelete = financialBalance.deleteExpense(expenseToDelete);
 			if (successDelete) rowsToDelete[j++] = i;
 		}

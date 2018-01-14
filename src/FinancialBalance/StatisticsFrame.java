@@ -5,12 +5,15 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.time.YearMonth;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -96,6 +99,12 @@ public class StatisticsFrame extends JFrame{
 		tabbedPane.add("Expenses per category",expensesPerCategoryPanel);
 		
 		this.add(tabbedPane);
+		
+		try {
+			this.setIconImage(ImageIO.read(new File("img/icon.png")));
+		} catch (IOException ioe) {
+			System.err.println(ioe.getMessage());
+		}
 		
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		Dimension dim = tk.getScreenSize();
