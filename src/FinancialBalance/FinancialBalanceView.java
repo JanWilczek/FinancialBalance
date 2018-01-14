@@ -8,23 +8,14 @@ import java.io.IOException;
 import java.awt.Insets;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
-import java.lang.reflect.Field;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 
 import java.text.SimpleDateFormat;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 
@@ -41,9 +32,8 @@ public class FinancialBalanceView extends JFrame {
 	 * Public constructor.
 	 * @param financialBalance
 	 */
-	public FinancialBalanceView(FinancialBalance financialBalance)
+	public FinancialBalanceView()
 	{
-		this.financialBalance = financialBalance;
 		this.setSize(baseWidth, baseHeight);
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		Dimension dim = tk.getScreenSize();
@@ -63,9 +53,6 @@ public class FinancialBalanceView extends JFrame {
 		mainLayoutConstraints = new GridBagConstraints();
 		mainLayoutConstraints.insets = new Insets(2,2,2,2);
 
-		// reportsScrollPane content:
-		generateReportsTable();
-		
 		// addPanel content:
 		//Creating a text field for the expense name
 		setNameField(new JTextField(getDefaultExpenseName()));
@@ -100,7 +87,24 @@ public class FinancialBalanceView extends JFrame {
 		mainPanel.add(addPanel,mainLayoutConstraints);
 		
 		// tableScrollPane content
-		generateExpensesTable();
+		expensesTable = new JTable();
+		expensesScrollPane = new JScrollPane(expensesTable);
+		expensesTable.setFillsViewportHeight(true);
+		expensesTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
+		setLayoutConstraints(1,1,1,1,0.7,0.8);
+		mainLayoutConstraints.anchor = GridBagConstraints.PAGE_START;
+		mainLayoutConstraints.fill = GridBagConstraints.BOTH;		// Fill both horizontally and vertically the tableScrollPane.
+		mainPanel.add(expensesScrollPane, mainLayoutConstraints);
+		
+		// reportsScrollPane content:
+		reportsTable =  new JTable();
+		reportsScrollPane = new JScrollPane(reportsTable);
+		reportsTable.setFillsViewportHeight(true);	// Fill the remaining height of the viewport.
+		setLayoutConstraints(0,0,1,2,0.2,1);	// First row, first column, 1x2 vertical cells size, 20% of the GUI's width, all of the column's height.
+		mainLayoutConstraints.ipadx = 0;	// Reset to default value.
+		mainLayoutConstraints.anchor = GridBagConstraints.PAGE_START;
+		mainLayoutConstraints.fill = GridBagConstraints.BOTH;	// Fill both horizontally and vertically the reportsScrollPane.
+		mainPanel.add(reportsScrollPane, mainLayoutConstraints);	
 		
 		// Create menu
 		menuBar = new JMenuBar();
@@ -124,86 +128,6 @@ public class FinancialBalanceView extends JFrame {
 		
 		this.add(mainPanel);
 		this.setResizable(true);			
-	}
-
-	/**
-	 * Generate the reports table.
-	 */
-	private void generateReportsTable() {
-		Object [][] reportsData = new Object [financialBalance.getMonthlyReports().size()][2];
-		int dataIndex = 0;
-		List<Map.Entry<YearMonth, MonthlyReport>> monthlyReports = new LinkedList<>(financialBalance.getMonthlyReports().entrySet());
-		Collections.reverse(monthlyReports);
-		for (Map.Entry<YearMonth, MonthlyReport> monthlyReport : monthlyReports)
-		{
-			reportsData[dataIndex][0] = monthlyReport.getKey().format(DateTimeFormatter.ofPattern("yyyy-MM"));
-			reportsData[dataIndex][1] = monthlyReport.getValue().getTotal();
-			dataIndex++;
-		}
-		String [] reportHeader = {"Month", "Total"};
-		reportsTable = new JTable(new DefaultTableModel(reportsData,reportHeader));
-		reportsScrollPane = new JScrollPane(reportsTable);
-		reportsTable.setFillsViewportHeight(true);	// Fill the remaining height of the viewport.
-		setLayoutConstraints(0,0,1,2,0.2,1);	// First row, first column, 1x2 vertical cells size, 20% of the GUI's width, all of the column's height.
-		mainLayoutConstraints.ipadx = 0;	// Reset to default value.
-		mainLayoutConstraints.anchor = GridBagConstraints.PAGE_START;
-		mainLayoutConstraints.fill = GridBagConstraints.BOTH;	// Fill both horizontally and vertically the reportsScrollPane.
-		mainPanel.add(reportsScrollPane, mainLayoutConstraints);
-	}
-	
-	/**
-	 * Generate the expenses table.
-	 */
-	private void generateExpensesTable() {
-		//Set the table data
-		//Get column names from Expense fields as a String array
-		String[] columnNames = null;
-		try {
-			Class<?> expenseClass = Class.forName("FinancialBalance.Expense");
-			Field[] expenseClassFields = expenseClass.getDeclaredFields();
-			columnNames = new String[expenseClassFields.length];
-			for (int i = 0; i<expenseClassFields.length ; i++)
-			{
-				columnNames[i] = expenseClassFields[i].getName();
-			}
-		} catch (ClassNotFoundException cnfe) {
-			cnfe.printStackTrace();
-		} catch (SecurityException se){
-			se.printStackTrace();
-		}
-		
-		//Get the expense data as a two-dimensional Object array
-		Object[][] expensesData = null;
-		if (columnNames != null) 
-			{
-				List<Expense> expensesList = financialBalance.getExpenses();
-				expensesData = new Object[expensesList.size()][columnNames.length];
-				int i = 0;
-				for (Expense expense : expensesList)
-				{
-					expensesData[i][0] = expense.getName();
-					expensesData[i][1] = expense.getCategory();
-					expensesData[i][2] = getSimpleDateFormat().format(expense.getDate().getTime());
-					expensesData[i][3] = expense.getPrice();
-					i++;
-				}
-				
-			}
-		
-		//Create the table
-		expensesTable = new JTable(new DefaultTableModel(expensesData,columnNames));
-		tableScrollPane = new JScrollPane(expensesTable);
-		expensesTable.setFillsViewportHeight(true);
-		expensesTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
-		
-		// Setting up columns' width
-		TableColumn namesColumn = expensesTable.getColumnModel().getColumn(0);
-		namesColumn.setPreferredWidth(400);	// Set the name field wide and with JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS make the next columns resized.
-		
-		setLayoutConstraints(1,1,1,1,0.7,0.8);
-		mainLayoutConstraints.anchor = GridBagConstraints.PAGE_START;
-		mainLayoutConstraints.fill = GridBagConstraints.BOTH;		// Fill both horizontally and vertically the tableScrollPane.
-		mainPanel.add(tableScrollPane, mainLayoutConstraints);
 	}
 	
 	/**
@@ -267,6 +191,13 @@ public class FinancialBalanceView extends JFrame {
 		
 	// public getters
 	public JTable getExpensesTable() { return this.expensesTable; }
+	public void setExpensesTable(JTable expensesTable) { this.expensesTable = expensesTable; } 
+	public JTable getReportsTable() { return reportsTable;	}
+	public void setReportsTable(JTable reportsTable) { this.reportsTable = reportsTable; }
+	public JScrollPane getExpensesScrollPane() {	return expensesScrollPane;	}
+	public void setExpensesScrollPane(JScrollPane expensesScrollPane) { this.expensesScrollPane = expensesScrollPane; }
+	public JScrollPane getReportsScrollPane() {	return reportsScrollPane;	}
+	public void setReportsScrollPane(JScrollPane reportsScrollPane) {	this.reportsScrollPane = reportsScrollPane;	}
 	public JButton getAddButton() { return this.addButton; }
 	public JTextField getNameField() {	return nameField;	}
 	public void setNameField(JTextField nameField) {this.nameField = nameField;	}
@@ -283,9 +214,6 @@ public class FinancialBalanceView extends JFrame {
 	public JPanel getMainPanel() {	return this.mainPanel; }
 	public JPanel getAddPanel() { return addPanel;}
 	public JMenuItem getStatisticsMenuItem() { return statisticsMenuItem;}
-
-	// inner application logic
-	private FinancialBalance financialBalance;
 	
 	// GUI elements
 	// panels
@@ -293,7 +221,7 @@ public class FinancialBalanceView extends JFrame {
 	private JPanel addPanel;
 	
 	// scroll panes
-	private JScrollPane tableScrollPane;
+	private JScrollPane expensesScrollPane;
 	private JScrollPane reportsScrollPane;
 	
 	// buttons

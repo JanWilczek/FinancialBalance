@@ -23,6 +23,6 @@ public class AppFrameRunner implements Runnable
 	@Override
 	public void run() {
 		@SuppressWarnings("unused")
-		FinancialBalanceView frame = new FinancialBalanceView(financialBalance);
+		FinancialBalanceView frame = new FinancialBalanceView();
 	}
 }

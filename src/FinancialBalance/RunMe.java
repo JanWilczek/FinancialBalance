@@ -19,7 +19,7 @@ import javax.swing.SwingUtilities;
 public class RunMe {
 	public static void main(String [] args){
 		FinancialBalance financialBalance = new FinancialBalance("expenses");
-		FinancialBalanceView financialBalanceView = new FinancialBalanceView(financialBalance);
+		FinancialBalanceView financialBalanceView = new FinancialBalanceView();
 		@SuppressWarnings("unused")
 		FinancialBalanceController financialBalanceController = new FinancialBalanceController(financialBalance, financialBalanceView);
 		//SwingUtilities.invokeLater(new AppFrameRunner(fb));
