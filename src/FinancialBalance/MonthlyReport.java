@@ -37,8 +37,27 @@ public class MonthlyReport {
 		total = new BigDecimal("0.00");
 		categoriesTotals = new HashMap<ExpenseCategory, BigDecimal>();
 		for (ExpenseCategory expenseCategory : ExpenseCategory.values()) categoriesTotals.put(expenseCategory, new BigDecimal("0.00"));
-		calculateMonthlyExpenses(expenses);
-
+		if (expenses != null) calculateMonthlyExpenses(expenses);
+	}
+	
+	/**
+	 * To be fired when an expense is added.
+	 * @param addedExpense
+	 */
+	public void onExpenseAdded(Expense addedExpense)
+	{
+		total = total.add(addedExpense.getPrice());
+		categoriesTotals.compute(addedExpense.getCategory(), (expenseCategory, categoryTotal) -> categoryTotal = categoryTotal.add(addedExpense.getPrice()));
+	}
+	
+	/**
+	 * To be fired when an expense is deleted.
+	 * @param deletedExpense
+	 */
+	public void onExpenseDeleted(Expense deletedExpense)
+	{
+		total = total.subtract(deletedExpense.getPrice());
+		categoriesTotals.compute(deletedExpense.getCategory(), (expenseCategory, categoryTotal) -> categoryTotal = categoryTotal.subtract(deletedExpense.getPrice()));
 	}
 	
 	// Public getters:
@@ -61,13 +80,13 @@ public class MonthlyReport {
 	// Private methods
 	private void calculateMonthlyExpenses(List<Expense> expenses)
 	{
-		for (Expense expense : expenses)
-		{
-			if (expense.getDate().get(Calendar.MONTH) + 1 == month.getMonth().getValue() && expense.getDate().get(Calendar.YEAR) == month.getYear()) {
-				categoriesTotals.put(expense.getCategory(), categoriesTotals.get(expense.getCategory()).add(expense.getPrice()));
-				total = total.add(expense.getPrice());
-			}
-		}
+		expenses.stream()
+				.filter(expense -> expense.getDate().get(Calendar.MONTH) + 1 == month.getMonth().getValue() && expense.getDate().get(Calendar.YEAR) == month.getYear())
+				.forEach(expense -> 
+				{
+					categoriesTotals.put(expense.getCategory(), categoriesTotals.get(expense.getCategory()).add(expense.getPrice()));
+					total = total.add(expense.getPrice());
+				});
 	}
 	
 	// Private members:

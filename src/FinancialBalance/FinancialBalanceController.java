@@ -80,6 +80,7 @@ public class FinancialBalanceController {
 		financialBalanceView.getNameField().setText("");
 		financialBalanceView.getNameField().requestFocus();
 		financialBalanceView.getPriceField().setValue("0.00");
+		generateReportsTable();
 	}
 	
 	private void deleteSelectedExpenses() {
@@ -98,8 +99,7 @@ public class FinancialBalanceController {
 			if (successDelete) rowsToDelete[j++] = i;
 		}
 		SwingUtilities.invokeLater(new RowRemover(rowsToDelete));	// schedules the row-removing process
-		
-		// TODO: Update monthly reports' table.
+		SwingUtilities.invokeLater(() -> generateReportsTable());	// schedule update of the monthly reports' table
 	}
 	
 	/**
@@ -167,7 +167,6 @@ public class FinancialBalanceController {
 		TableColumn namesColumn = financialBalanceView.getExpensesTable().getColumnModel().getColumn(0);
 		namesColumn.setPreferredWidth(400);	// Set the name field wide and with JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS make the next columns resized.
 	}
-	
 	
 	// a row removing utility working on a separate thread
 	private class RowRemover implements Runnable{

@@ -42,14 +42,21 @@ public class MonthlyReportTest extends TestCase {
 	}
 	
 	@Test
-	public void testMonthlyReports()
+	public void testMonthlyReportsConstructor()
 	{
 		BigDecimal total = new BigDecimal("3.45");
 		total = total.add(new BigDecimal("60.24"));
 		total = total.add(new BigDecimal("2.43"));
 		
 		MonthlyReport testReport = new MonthlyReport(YearMonth.of(2017, 12), mockExpenses);
-		assertTrue(testReport.getTotal().equals(total));
+		assertEquals(testReport.getTotal(), total);
 		assertTrue(testReport.getCategoryTotal(ExpenseCategory.School).equals(new BigDecimal("2.43")));
+	}
+	
+	@Test
+	public void testMonthlyReportsNullExpenses()
+	{
+		MonthlyReport testReport = new MonthlyReport(YearMonth.of(2017, 12), null);
+		assertEquals(testReport.getTotal(), new BigDecimal("0.00"));
 	}
 }

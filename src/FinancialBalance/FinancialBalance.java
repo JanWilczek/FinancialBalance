@@ -38,18 +38,14 @@ public class FinancialBalance {
 	private List<Expense> expenses;
 	private Map<YearMonth, MonthlyReport> monthlyReports;
 	private DataProvider dataProvider;
-	private String name;	
 	
 	/**
 	 * Public constructor. Requires a name for the database.
-	 * @param name
 	 */
-	public FinancialBalance(String name)
+	public FinancialBalance(DataProvider dataProvider)
 	{
-		this.name = name;
-		
-		dataProvider = new SQLiteDatabaseDataProvider(this.name + ".db");
-		expenses = dataProvider.getExpenses();
+		this.dataProvider = dataProvider;
+		expenses = this.dataProvider.getExpenses();
 		
 		Collections.sort(expenses);
 		
@@ -67,9 +63,18 @@ public class FinancialBalance {
 	public int addExpense(Expense expenseToAdd)
 	{
 		if (dataProvider.addExpense(expenseToAdd)) {
-			expenses.add(expenseToAdd);
-			Collections.sort(expenses); // TODO: [RESEARCH] Is there a better way to do it than sorting all elements? Is sorting them costly?
-			generateMonthlyReports();	// TODO: Change it to raising an event
+			addExpenseToSortedList(expenseToAdd);
+						
+			// Updating monthly reports
+			YearMonth key = YearMonth.of(expenseToAdd.getDate().get(Calendar.YEAR), expenseToAdd.getDate().get(Calendar.MONTH) + 1);
+			MonthlyReport report = monthlyReports.get(key);
+			if (report == null)
+			{
+				report = new MonthlyReport(key, null);	// there are no expenses for this report, except for the new one.
+				monthlyReports.put(key, report);
+			}
+			report.onExpenseAdded(expenseToAdd);
+			
 			return expenses.indexOf(expenseToAdd);
 		}
 		return -1;
@@ -91,7 +96,7 @@ public class FinancialBalance {
 		if (dataProvider.deleteExpense(expenseToDelete))
 		{
 			expenses.remove(expenseToDelete);
-			generateMonthlyReports();	// TODO: Change it to raising an event
+			monthlyReports.get(YearMonth.of(expenseToDelete.getDate().get(Calendar.YEAR), expenseToDelete.getDate().get(Calendar.MONTH) + 1)).onExpenseDeleted(expenseToDelete);
 			return true;			
 		}
 		return false;
@@ -104,10 +109,11 @@ public class FinancialBalance {
 	 */
 	public boolean deleteExpense(int expenseToDeleteIndex)
 	{
-		if (dataProvider.deleteExpense(expenses.get(expenseToDeleteIndex)))
+		Expense expenseToDelete = expenses.get(expenseToDeleteIndex);
+		if (dataProvider.deleteExpense(expenseToDelete))
 		{
-			expenses.remove(expenseToDeleteIndex);
-			generateMonthlyReports();	// TODO: Change it to raising an event.
+			expenses.remove(expenseToDelete);
+			monthlyReports.get(YearMonth.of(expenseToDelete.getDate().get(Calendar.YEAR), expenseToDelete.getDate().get(Calendar.MONTH) + 1)).onExpenseDeleted(expenseToDelete);
 			return true;
 		}
 		return false;
@@ -149,11 +155,11 @@ public class FinancialBalance {
 	}
 	
 	/**
-	 * @return name of the file database is stored in
+	 * @return inner data provider
 	 */
-	public String getDatabaseFileName()
+	public DataProvider getDataProvider() 
 	{
-		return dataProvider.getDatabaseFileName();
+		return dataProvider;
 	}
 	
 	/**
@@ -172,4 +178,19 @@ public class FinancialBalance {
 			monthlyReports.put(month, new MonthlyReport(month, expenses));
 		}
 	}
+	
+	private void addExpenseToSortedList(Expense expenseToAdd) {
+        if (expenses.size() == 0) {
+        	expenses.add(expenseToAdd);
+        } else if (expenses.get(0).compareTo(expenseToAdd) == 1) {
+        	expenses.add(0, expenseToAdd);
+        } else if (expenses.get(expenses.size() - 1).compareTo(expenseToAdd) == -1) {
+        	expenses.add(expenses.size(), expenseToAdd);
+        } else {
+            int i = 0;
+            while (expenses.get(i).compareTo(expenseToAdd) == -1) { i++; }
+            expenses.add(i, expenseToAdd);
+        }
+    }
+
 }

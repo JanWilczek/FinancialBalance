@@ -12,13 +12,15 @@ import org.junit.Test;
 import FinancialBalance.Expense;
 import FinancialBalance.ExpenseCategory;
 import FinancialBalance.FinancialBalance;
+import FinancialBalance.DataProvider;
+import FinancialBalance.SQLiteDatabaseDataProvider;
 
 public class FinancialBalanceTest extends TestCase {
 		FinancialBalance financialBalance;
 		
 		protected void setUp()
 		{
-			financialBalance = new FinancialBalance("test");
+			financialBalance = new FinancialBalance((DataProvider) new SQLiteDatabaseDataProvider("test"));
 		}
 		
 		protected void tearDown() 
@@ -26,7 +28,7 @@ public class FinancialBalanceTest extends TestCase {
 			financialBalance.clearDatabase();
 			financialBalance.close();
 			try {
-				Files.deleteIfExists(Paths.get(financialBalance.getDatabaseFileName()));
+				Files.deleteIfExists(Paths.get(financialBalance.getDataProvider().getDatabaseFileName()));
 			} catch (IOException ioe) {
 				System.err.println(ioe.getMessage());
 			}

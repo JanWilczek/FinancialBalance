@@ -8,9 +8,6 @@
 
 package FinancialBalance;
 
-import FinancialBalance.threading.*;
-import javax.swing.SwingUtilities;
-
 /**
  * The main thread class.
  * @author Jan Wilczek
@@ -18,10 +15,9 @@ import javax.swing.SwingUtilities;
  */
 public class RunMe {
 	public static void main(String [] args){
-		FinancialBalance financialBalance = new FinancialBalance("expenses");
+		FinancialBalance financialBalance = new FinancialBalance((DataProvider) new SQLiteDatabaseDataProvider("expenses.db"));
 		FinancialBalanceView financialBalanceView = new FinancialBalanceView();
 		@SuppressWarnings("unused")
 		FinancialBalanceController financialBalanceController = new FinancialBalanceController(financialBalance, financialBalanceView);
-		//SwingUtilities.invokeLater(new AppFrameRunner(fb));
 	}
 }
