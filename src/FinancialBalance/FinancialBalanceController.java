@@ -65,7 +65,7 @@ public class FinancialBalanceController {
 	private void addEnteredExpense() {
 		Expense expenseToAdd = null;
 		try {
-			expenseToAdd = Expense.parseExpense(financialBalanceView.getNameField().getText(), financialBalanceView.getCategoryCombo().getSelectedItem().toString(), financialBalanceView.getSimpleDateFormat().format((Date)financialBalanceView.getDateField().getValue()), financialBalanceView.getPriceField().getValue().toString(), "yyyy/MM/dd");
+			expenseToAdd = Expense.parseExpense(financialBalanceView.getNameField().getText(), financialBalanceView.getCategoryCombo().getSelectedItem().toString(), financialBalanceView.getDateFormat().format((Date)financialBalanceView.getDateField().getValue()), financialBalanceView.getPriceField().getValue().toString(), "yyyy/MM/dd");
 		} catch (NumberFormatException nfe) {
 			JOptionPane.showMessageDialog(financialBalanceView, nfe.getMessage() + " : Incorrect price format!", "Incorrect price format",JOptionPane.ERROR_MESSAGE);
 		} catch (ParseException pe) {
@@ -74,7 +74,7 @@ public class FinancialBalanceController {
 		
 		int index = financialBalance.addExpense(expenseToAdd);	// Add the expense to the main logic object.
 		DefaultTableModel model = (DefaultTableModel) financialBalanceView.getExpensesTable().getModel();
-		model.insertRow(index, new Object[] {expenseToAdd.getName(), expenseToAdd.getCategory(), financialBalanceView.getSimpleDateFormat().format(expenseToAdd.getDate().getTime()), expenseToAdd.getPrice()});
+		model.insertRow(index, new Object[] {expenseToAdd.getName(), expenseToAdd.getCategory(), financialBalanceView.getDateFormat().format(expenseToAdd.getDate().getTime()), expenseToAdd.getPrice()});
 
 		// Reset priceField to its default. Leave the category and the date in case user wanted to add several objects with the same category or date. Set the focus to the name field.
 		financialBalanceView.getNameField().setText("");
@@ -89,7 +89,7 @@ public class FinancialBalanceController {
 		int j = 0;
 		for (int i : selectedRows) {
 			Calendar cal = Calendar.getInstance();
-			try{cal.setTime(financialBalanceView.getSimpleDateFormat().parse((String)financialBalanceView.getExpensesTable().getValueAt(i, 2)));}
+			try{cal.setTime(financialBalanceView.getDateFormat().parse((String)financialBalanceView.getExpensesTable().getValueAt(i, 2)));}
 			catch(ParseException pe){System.err.println(pe.getMessage()); return;	}
 			Expense expenseToDelete = new Expense((String) financialBalanceView.getExpensesTable().getValueAt(i, 0),
 													(ExpenseCategory) financialBalanceView.getExpensesTable().getValueAt(i, 1),
@@ -153,7 +153,7 @@ public class FinancialBalanceController {
 				{
 					expensesData[i][0] = expense.getName();
 					expensesData[i][1] = expense.getCategory();
-					expensesData[i][2] = financialBalanceView.getSimpleDateFormat().format(expense.getDate().getTime());
+					expensesData[i][2] = financialBalanceView.getDateFormat().format(expense.getDate().getTime());
 					expensesData[i][3] = expense.getPrice();
 					i++;
 				}

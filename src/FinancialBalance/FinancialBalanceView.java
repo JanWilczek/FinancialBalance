@@ -13,6 +13,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -207,8 +208,8 @@ public class FinancialBalanceView extends JFrame {
 	public void setDateField(JSpinner dateField) {this.dateField = dateField;}
 	public JFormattedTextField getPriceField() {return priceField;	}
 	public void setPriceField(JFormattedTextField priceField) {	this.priceField = priceField;}
-	public SimpleDateFormat getSimpleDateFormat() {	return simpleDateFormat;}
-	public void setSimpleDateFormat(SimpleDateFormat simpleDateFormat) {this.simpleDateFormat = simpleDateFormat;}
+	public DateFormat getDateFormat() {	return dateFormat;}
+	public void setDateFormat(DateFormat dateFormat) {this.dateFormat = dateFormat;}
 	public String getDefaultExpenseName() {return defaulExpensetName;	}
 	public void setDefaultExpenseName(String defaultName) {this.defaulExpensetName = defaultName;	}
 	public JPanel getMainPanel() {	return this.mainPanel; }
@@ -246,7 +247,7 @@ public class FinancialBalanceView extends JFrame {
 	private GridBagConstraints mainLayoutConstraints;
 	
 	// date format
-	private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+	private DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
 	
 	// other private members
 	private String defaulExpensetName = "Insert the expense name here...               ";
