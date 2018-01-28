@@ -62,8 +62,9 @@ public class FinancialBalance {
 	 */
 	public int addExpense(Expense expenseToAdd)
 	{
+		int indexOfAddedExpense = -1;
 		if (dataProvider.addExpense(expenseToAdd)) {
-			addExpenseToSortedList(expenseToAdd);
+			indexOfAddedExpense = addExpenseToSortedList(expenseToAdd);
 						
 			// Updating monthly reports
 			YearMonth key = YearMonth.of(expenseToAdd.getDate().get(Calendar.YEAR), expenseToAdd.getDate().get(Calendar.MONTH) + 1);
@@ -74,10 +75,8 @@ public class FinancialBalance {
 				monthlyReports.put(key, report);
 			}
 			report.onExpenseAdded(expenseToAdd);
-			
-			return expenses.indexOf(expenseToAdd);
 		}
-		return -1;
+		return indexOfAddedExpense;
 	}
 	
 	/**
@@ -179,17 +178,31 @@ public class FinancialBalance {
 		}
 	}
 	
-	private void addExpenseToSortedList(Expense expenseToAdd) {
+	private int addExpenseToSortedList(Expense expenseToAdd) {
         if (expenses.size() == 0) {
         	expenses.add(expenseToAdd);
+        	return 0;
         } else if (expenses.get(0).compareTo(expenseToAdd) == 1) {
         	expenses.add(0, expenseToAdd);
+        	return 0;
         } else if (expenses.get(expenses.size() - 1).compareTo(expenseToAdd) == -1) {
         	expenses.add(expenses.size(), expenseToAdd);
+        	return expenses.size() - 1;
         } else {
-            int i = 0;
-            while (expenses.get(i).compareTo(expenseToAdd) == -1) { i++; }
-            expenses.add(i, expenseToAdd);
+            // binary insert
+            int left = 0;
+            int right = expenses.size() - 1;
+            int mid;
+            while (left <= right)
+            {
+            	mid = (left + right) / 2;
+            	if (expenses.get(mid).compareTo(expenseToAdd) == -1)
+            		left = mid + 1;
+            	else
+            		right = mid - 1;
+            }
+            expenses.add(left, expenseToAdd);
+            return left;
         }
     }
 
