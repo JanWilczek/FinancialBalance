@@ -46,7 +46,7 @@ public class FinancialBalanceController {
 		generateReportsTable();
 		
 		// add necessary listeners
-		this.financialBalanceView.getAddButton().addActionListener(ae -> addEnteredExpense());
+		this.financialBalanceView.getAddButton().addActionListener(ae -> SwingUtilities.invokeLater(() -> {addEnteredExpense();}));
 		this.financialBalanceView.getExpensesTable().addKeyListener(new DeletePressedListener());
 		this.financialBalanceView.getNameField().addKeyListener(new EnterPressedListener());
 		this.financialBalanceView.getCategoryCombo().addKeyListener(new EnterPressedListener());
@@ -200,7 +200,7 @@ public class FinancialBalanceController {
 				int decision = JOptionPane.showConfirmDialog(financialBalanceView.getMainPanel(), "Are You sure, You want to delete selected expense(s) from database?", "Delete selected expense(s)", JOptionPane.YES_NO_OPTION);
 				if (decision == JOptionPane.YES_NO_OPTION)
 				{
-					deleteSelectedExpenses();
+					SwingUtilities.invokeLater(() -> {deleteSelectedExpenses();});
 				}
 			}			
 		}
@@ -219,7 +219,7 @@ public class FinancialBalanceController {
 		public void keyReleased(KeyEvent ke) {
 			if (ke.getKeyCode()==KeyEvent.VK_ENTER)
 			{
-				addEnteredExpense();
+				SwingUtilities.invokeLater(() -> {addEnteredExpense();});
 			}
 		}
 

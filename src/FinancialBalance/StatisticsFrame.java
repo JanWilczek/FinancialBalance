@@ -96,7 +96,7 @@ public class StatisticsFrame extends JFrame{
 		
 		tabbedPane = new JTabbedPane();
 		tabbedPane.add("Totals history", totalsHistoryPanel);
-		tabbedPane.add("Expenses per category",expensesPerCategoryPanel);
+		tabbedPane.add("Expenses per month",expensesPerCategoryPanel);
 		
 		this.add(tabbedPane);
 		
